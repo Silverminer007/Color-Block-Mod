@@ -1,0 +1,13 @@
+{
+	"item.color_block.color_block": "Color Block",
+	"block.color_block.color_block": "Color Block",
+	"item.color_block.color_tool": "Color Tool",
+	"itemgroup.color_block.color_block": "Color Items",
+	"block.color_block.color_block.error.non_int_value": "Can't set value of color to an non int value. Don't Report this Error",
+	"item.color_block.color_tool.tooltip.normal": "The Actuall Color is:",
+	"item.color_block.color_tool.tooltip.advanced": " This Item can be Used to Customise Color Blocks. \n Sneak while clicking on the Color Block to take the Color of the Block \n Rename this Item in Anvil to an Number to set the Coloring color \n Click on the Color Block to Color it to the settet Color \n The Actuall Color is:",
+	"container.color_block": "Coloring Color Block",
+	"container.number_system_base": "Numbering System Base",
+	"itemGroup.color_block": "Color Block Items",
+	"item.color_block.multi_dye": "Multi Dye"
+}

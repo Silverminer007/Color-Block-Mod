@@ -1,0 +1,13 @@
+{
+	"item.color_block.color_block": "Farb Block",
+	"block.color_block.color_block": "Farb Block",
+	"item.color_block.color_tool": "Farb Werkzeug",
+	"itemgroup.color_block.color_block": "Farb Items & Bloecke",
+	"block.color_block.color_block.error.non_int_value": "Die Farbe auf die ein Farbblock gesetzt wird muss eine Zahl sein. Bitte melde diesen Fehler Nicht!",
+	"item.color_block.color_tool.tooltip.normal": "Die Aktuelle Farbe ist:",
+	"item.color_block.color_tool.tooltip.advanced": " Dieses Item kann benutzt werden um Farbbloecke ein zu färben. \n Schleiche während du auf den Farbblock klickst um die Farbe des Blocks aufzunehemen \n Benenne dieses Item als Zahl(z.B. 123) um die Farbe zum einfärben von Farbbloecken zu setzten \n Klicke auf den Farbblock um dessen farbe zu setzten \n Die Aktuelle Farbe ist:",
+	"container.color_block": "Wechseln der Block Farbe",
+	"container.number_system_base": "Zahlen System Basis",
+	"itemGroup.color_block": "Farb Block Items",
+	"item.color_block.multi_dye": "Bunter Farbstoff"
+}

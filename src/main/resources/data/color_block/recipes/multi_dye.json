@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "tag": "color_block:dye"
+    }
+  ],
+  "result": {
+    "item": "color_block:multi_dye"
+  }
+}
