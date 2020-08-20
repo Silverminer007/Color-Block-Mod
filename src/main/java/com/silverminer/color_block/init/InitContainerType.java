@@ -2,6 +2,7 @@ package com.silverminer.color_block.init;
 
 import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
+import com.silverminer.color_block.gui.container.ImageContainer;
 
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraftforge.common.extensions.IForgeContainerType;
@@ -21,4 +22,7 @@ public class InitContainerType {
 	 */
 	public static final RegistryObject<ContainerType<ColorBlockContainer>> COLOR_BLOCK = CONTAINER
 			.register("color_block", () -> IForgeContainerType.create(ColorBlockContainer::new));
+
+	public static final RegistryObject<ContainerType<ImageContainer>> IMAGE_CONTAINER = CONTAINER
+			.register("image_container", () -> IForgeContainerType.create(ImageContainer::new));
 }

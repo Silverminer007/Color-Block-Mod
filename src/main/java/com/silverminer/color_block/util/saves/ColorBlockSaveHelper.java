@@ -7,9 +7,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class ColorBlockSaveHelper implements INBTSerializable<CompoundNBT> {
-	private BlockPos pos = null;
+	private BlockPos pos = BlockPos.ZERO;
 	private int color = -1;
-	private String dimension = null;
+	private String dimension = "";
 
 	public ColorBlockSaveHelper(BlockPos position, int color, String dimensionName) {
 		this.pos = position;
@@ -60,6 +60,7 @@ public class ColorBlockSaveHelper implements INBTSerializable<CompoundNBT> {
 
 	/**
 	 * Lieﬂt dieses Element aus CompountNBT aus
+	 * 
 	 * @param nbt Das Tag aus dem Ausgelesen wird
 	 */
 	public void deserializeNBT(CompoundNBT nbt) {
@@ -68,5 +69,10 @@ public class ColorBlockSaveHelper implements INBTSerializable<CompoundNBT> {
 		String dim = nbt.getString("dimension");
 		ColorBlockSaveHelper helper = this.setColor(color).setDimension(dim).setPosition(pos);
 		ColorBlockMod.COLOR_BLOCKS.add(helper);
+	}
+
+	public String toString() {
+		return "ColorBlockSaveHelper{Color:" + this.getColor() + ", Position:" + this.getPosition().toString()
+				+ ", Dimension:" + this.getDimensionName() + "}";
 	}
 }

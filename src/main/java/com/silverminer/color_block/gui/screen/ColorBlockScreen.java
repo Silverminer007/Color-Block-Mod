@@ -11,7 +11,7 @@ import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.util.math.NumberingSystem;
-import com.silverminer.color_block.util.saves.ColorBlockContainerSaves;
+import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -65,7 +65,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 		this.setFocusedDefault(this.nameField);
 		this.nameField.setFocused2(true);
 
-		NumberingSystem system = ColorBlockContainerSaves.getSystem(this.getContainer().getPlayer());
+		NumberingSystem system = Saves.getSystem(this.getContainer().getPlayer());
 		system = system == null ? NumberingSystem.DEZ : system;
 
 		this.mode_button = this.func_230480_a_(new ColorBlockScreen.ModeButton(this.getGuiLeft() + 173,
@@ -144,7 +144,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 
 	@Override
 	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-		int color = ColorBlock.getColorStatic(ColorBlockContainerSaves.getPosition(this.getContainer().getPlayer()));
+		int color = ColorBlock.getColorStatic(Saves.getPosition(this.getContainer().getPlayer()));
 		String newString = this.mode_button.getZahlenSystem().parseToStringFromDez(color);
 		this.nameField.setText(color == -1 ? "" : newString);
 		this.func_231035_a_(this.nameField);
@@ -165,7 +165,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 		this.nameField.setText(castInt == -1 ? "" : newString);
 		this.nameField.setFocused2(true);
 
-		ColorBlockContainerSaves.setOrCreateSystem(this.getContainer().getPlayer(), this.mode_button.getZahlenSystem());
+		Saves.setOrCreateSystem(this.getContainer().getPlayer(), this.mode_button.getZahlenSystem());
 	}
 
 	public class ModeButton extends Button {

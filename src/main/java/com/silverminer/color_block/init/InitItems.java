@@ -34,4 +34,7 @@ public class InitItems {
 	 */
 	public static final RegistryObject<Item> MULTI_DYE = ITEMS.register("multi_dye",
 			() -> new Item(new Item.Properties().group(ModItemGroups.COLOR_BLOCK)));
+
+	public static final RegistryObject<Item> IMAGE_BLOCK = ITEMS.register("image_block",
+			() -> new BlockItem(InitBlocks.IMAGE_BLOCK.get(), new Item.Properties().group(ModItemGroups.COLOR_BLOCK)));
 }

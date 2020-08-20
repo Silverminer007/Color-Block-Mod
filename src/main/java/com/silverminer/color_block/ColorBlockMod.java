@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.silverminer.color_block.gui.screen.ColorBlockScreen;
+import com.silverminer.color_block.gui.screen.ImageScreen;
 import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.init.InitItems;
@@ -58,5 +59,6 @@ public class ColorBlockMod {
 		ColorBlockMod.LOGGER.info("Registering Renderers and Screens");
 
 		ScreenManager.registerFactory(InitContainerType.COLOR_BLOCK.get(), ColorBlockScreen::new);
+		ScreenManager.registerFactory(InitContainerType.IMAGE_CONTAINER.get(), ImageScreen::new);
 	}
 }

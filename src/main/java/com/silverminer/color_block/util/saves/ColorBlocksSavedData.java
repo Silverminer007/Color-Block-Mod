@@ -39,7 +39,7 @@ public class ColorBlocksSavedData extends WorldSavedData {
 			new ColorBlockSaveHelper().deserializeNBT((CompoundNBT) nbt.get(String.valueOf(i)));
 			i++;// Next Element
 		}
-		ColorBlockContainerSaves.deserializeNBT(nbt.getCompound("numbering_system"));
+		Saves.deserializeNBT(nbt.getCompound("numbering_system"));
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class ColorBlocksSavedData extends WorldSavedData {
 			// For all Objects in List put it in the *.nbt file
 			nbt.put(String.valueOf(ColorBlockMod.COLOR_BLOCKS.indexOf(helper)), helper.serializeNBT());
 		}
-		nbt.put("numbering_system", ColorBlockContainerSaves.serializeSystem(new CompoundNBT()));
+		nbt.put("numbering_system", Saves.serializeSystem(new CompoundNBT()));
 		return nbt;
 	}
 

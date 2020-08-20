@@ -11,7 +11,7 @@ import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
 import com.silverminer.color_block.init.InitItems;
 import com.silverminer.color_block.objects.items.ColorToolItem;
-import com.silverminer.color_block.util.saves.ColorBlockContainerSaves;
+import com.silverminer.color_block.util.saves.Saves;
 import com.silverminer.color_block.util.saves.ColorBlockSaveHelper;
 
 import net.minecraft.block.Block;
@@ -40,9 +40,12 @@ public class ColorBlock extends Block {
 	}
 
 	public static int getColorStatic(BlockPos pos) {
-		for (ColorBlockSaveHelper helper : ColorBlockMod.COLOR_BLOCKS) {// Durchsucht alle registierten Blöcke
-			if (helper.getPosition().equals(pos)) {// Prüft ob die Position mit der gesuchten übereinstimmt
-				return helper.getColor();// gibt die registierte Farbe zurück
+		for (int i = 0; i < ColorBlockMod.COLOR_BLOCKS.size(); i++) {
+			ColorBlockSaveHelper helper = ColorBlockMod.COLOR_BLOCKS.get(i);
+			if (helper != null) {
+				if (helper.getPosition().equals(pos)) {// Prüft ob die Position mit der gesuchten übereinstimmt
+					return helper.getColor();// gibt die registierte Farbe zurück
+				}
 			}
 		}
 		return 0xffffff;// Standart Farbe wenn der Block nicht in der Liste ist oder neu gesetzt wurde
@@ -55,38 +58,20 @@ public class ColorBlock extends Block {
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
 			ItemStack stack) {
 		if (!worldIn.isRemote()) {// Sorgt dafür, dass der Block nur 1 mal in die liste kommt
-			ColorBlockSaveHelper helper = new ColorBlockSaveHelper(pos, getColorStatic(pos), // Erstellt eine neue
-																								// Speicher einheit
+			// Erstellt eine neue Speicher einheit
+			ColorBlockSaveHelper helper = new ColorBlockSaveHelper(pos, getColorStatic(pos),
 					worldIn.func_230315_m_().toString());
-			if (!ColorBlockMod.COLOR_BLOCKS.contains(helper)) {// Prüft ob die Speichereinheit schon in der Liste ist
-				ColorBlockMod.COLOR_BLOCKS.add(helper);// Fügt anderen falls die einheit der Liste zu
-				if (ColorBlockMod.colorBlocksSavedData != null) {
-					ColorBlockMod.colorBlocksSavedData.markDirty();// Makiert, dass die Liste sich geändert hat
-				} else {
-					LOGGER.error("ColorBlock Saved Data wasn't inizialized: {}", ColorBlockMod.colorBlocksSavedData);
-				}
-			}
+			ColorBlock.addColor(helper);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
 		super.onReplaced(state, worldIn, pos, newState, isMoving);
-		for (ColorBlockSaveHelper helper : ColorBlockMod.COLOR_BLOCKS) {// Durchsucht die Liste nach dem gerade
-																		// zerstörten Block um ihn aus der Liste zu
-																		// entfernen
-			if (helper.getPosition().equals(pos)) {
-				ColorBlockMod.COLOR_BLOCKS.remove(helper);
-				if (ColorBlockMod.colorBlocksSavedData != null) {
-					ColorBlockMod.colorBlocksSavedData.markDirty();// Makiert, dass die Liste verändert wurde
-				} else {
-					LOGGER.error("ColorBlock Saved Data wasn't inizialized", ColorBlockMod.colorBlocksSavedData);
-				}
-				return;// Sorgt dafür, dass nur eine Speichereinheit entfent wird
-			}
+		if (!ColorBlock.removeColor(pos)) {
+			ColorBlockMod.LOGGER.error(
+					"An Error happened in ColorBlockMod: The Game tried to remove an non placed or saved Block. Please report this error!");
 		}
-		ColorBlockMod.LOGGER.error(
-				"An Error happened in ColorBlockMod: The Game tried to remove an non placed or saved Block. Please report this error!");
 	}
 
 	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player,
@@ -117,7 +102,7 @@ public class ColorBlock extends Block {
 					 * Holt die Zahl auf die die Farbe gesetzt werden soll
 					 */
 					String text = item.getDisplayName().getString();
-					int color = ColorBlockContainerSaves.getSystem(player).castStringToInt(text);
+					int color = Saves.getSystem(player).castStringToInt(text);
 					this.setColor(color == -1 ? getColorStatic(pos) : color, pos);// Setzt die Farbe
 				} catch (NumberFormatException numberformatexception) {
 					/**
@@ -150,7 +135,7 @@ public class ColorBlock extends Block {
 		}
 
 		else {// Öffnet die GUI
-			ColorBlockContainerSaves.setOrCreatePos(player, pos);
+			Saves.setOrCreatePos(player, pos);
 			if (!worldIn.isRemote()) {
 				player.openContainer(state.getContainer(worldIn, pos));
 			}
@@ -164,10 +149,13 @@ public class ColorBlock extends Block {
 	}
 
 	public ColorBlock setColor(int rgb, BlockPos pos) {
-		for (ColorBlockSaveHelper helper : ColorBlockMod.COLOR_BLOCKS) {// Durchsucht alle gesetzten Blöcke
-			/**
-			 * Prüft ob der Block der Block ist von dem die Farbe geändert werden soll
-			 */
+		ColorBlock.setColorStatic(rgb, pos);
+		return this;
+	}
+
+	public static void setColorStatic(int rgb, BlockPos pos) {
+		for (int i = 0; i < ColorBlockMod.COLOR_BLOCKS.size(); i++) {
+			ColorBlockSaveHelper helper = ColorBlockMod.COLOR_BLOCKS.get(i);
 			if (helper.getPosition().equals(pos)) {
 				helper.setColor(rgb);// Setzt die Farbe
 				if (ColorBlockMod.colorBlocksSavedData != null) {
@@ -176,10 +164,53 @@ public class ColorBlock extends Block {
 					LOGGER.error("ColorBlock Saved Data wasn't inizialized", ColorBlockMod.colorBlocksSavedData);
 				}
 				LOGGER.info("Settet the Color of ColorBlock At Position: {}" + " to Color: {}", pos, rgb);
-				return this;
+				return;
 			}
 		}
-		return this;
+	}
+
+	public static boolean removeColor(BlockPos pos) {
+		for (int i = 0; i < ColorBlockMod.COLOR_BLOCKS.size(); i++) {// Durchsucht die Liste nach dem gerade
+			// zerstörten Block um ihn aus der Liste zu
+			// entfernen
+			ColorBlockSaveHelper helper = ColorBlockMod.COLOR_BLOCKS.get(i);
+			if (helper.getPosition().equals(pos)) {
+				ColorBlockMod.COLOR_BLOCKS.remove(helper);
+				if (ColorBlockMod.colorBlocksSavedData != null) {
+					ColorBlockMod.colorBlocksSavedData.markDirty();// Makiert, dass die Liste verändert wurde
+				} else {
+					LOGGER.error("ColorBlock Saved Data wasn't inizialized", ColorBlockMod.colorBlocksSavedData);
+				}
+				return true;// Sorgt dafür, dass nur eine Speichereinheit entfent wird
+			}
+		}
+		return false;
+	}
+
+	public static boolean addColor(ColorBlockSaveHelper helper) {
+		// Prüft ob die Speichereinheit schon in der Liste ist
+		for (int i = 0; i < ColorBlockMod.COLOR_BLOCKS.size(); i++) {
+			ColorBlockSaveHelper save = ColorBlockMod.COLOR_BLOCKS.get(i);
+			if (save
+					.getPosition()
+					.equals(helper
+							.getPosition())) {
+				if (save.getColor() != helper.getColor()) {
+					ColorBlockMod.COLOR_BLOCKS.remove(i);
+					break;
+				} else {
+					return false;
+				}
+			}
+		}
+		ColorBlockMod.COLOR_BLOCKS.add(helper);// Fügt anderen falls die einheit der Liste zu
+		if (ColorBlockMod.colorBlocksSavedData != null) {
+			ColorBlockMod.colorBlocksSavedData.markDirty();// Makiert, dass die Liste sich geändert hat
+			return true;
+		} else {
+			LOGGER.error("ColorBlock Saved Data wasn't inizialized: {}", ColorBlockMod.colorBlocksSavedData);
+			return false;
+		}
 	}
 
 	@Nullable

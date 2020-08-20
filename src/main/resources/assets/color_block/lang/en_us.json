@@ -1,6 +1,8 @@
 {
 	"item.color_block.color_block": "Color Block",
 	"block.color_block.color_block": "Color Block",
+	"item.color_block.image_block": "Image Block",
+	"block.color_block.image_block": "Image Block",
 	"item.color_block.color_tool": "Color Tool",
 	"itemgroup.color_block.color_block": "Color Items",
 	"block.color_block.color_block.error.non_int_value": "Can't set value of color to an non int value. Don't Report this Error",
@@ -9,5 +11,10 @@
 	"container.color_block": "Coloring Color Block",
 	"container.number_system_base": "Numbering System Base",
 	"itemGroup.color_block": "Color Block Items",
-	"item.color_block.multi_dye": "Multi Dye"
+	"item.color_block.multi_dye": "Multi Dye",
+	"container.image_block": "Readin Images",
+    "container.image_block.to_big_image": "The read-in Image is to big",
+    "container.rotationButton": "Rotate The Image",
+    "container.axisButton": "The Axis of the Image",
+    "container.image_block.file_non_exists": "The given File doesn't exists'"
 }

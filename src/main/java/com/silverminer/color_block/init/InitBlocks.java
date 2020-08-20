@@ -2,6 +2,7 @@ package com.silverminer.color_block.init;
 
 import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
+import com.silverminer.color_block.objects.blocks.ImageBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -21,4 +22,7 @@ public class InitBlocks {
 	 */
 	public static final RegistryObject<Block> COLOR_BLOCK = BLOCKS.register("color_block",
 			() -> new ColorBlock(Block.Properties.from(Blocks.STONE)));
+
+	public static final RegistryObject<Block> IMAGE_BLOCK = BLOCKS.register("image_block", () -> new ImageBlock(
+			Block.Properties.from(Blocks.STONE).hardnessAndResistance(-1.0F, 3600000.0F).noDrops()));
 }

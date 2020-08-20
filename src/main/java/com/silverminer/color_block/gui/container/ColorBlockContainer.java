@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
-import com.silverminer.color_block.util.saves.ColorBlockContainerSaves;
+import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -44,7 +44,7 @@ public class ColorBlockContainer extends Container {
 	 */
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
-		BlockPos pos = ColorBlockContainerSaves.getPosition(playerIn);
+		BlockPos pos = Saves.getPosition(playerIn);
 		World playerWorld = playerIn.getEntityWorld();
 		BlockState state = playerWorld.getBlockState(pos);
 		Block block = state.getBlock();
@@ -57,6 +57,7 @@ public class ColorBlockContainer extends Container {
 		playerWorld.setBlockState(pos, state, 64);
 		playerWorld.notifyBlockUpdate(pos, state, state, 64);
 		playerWorld.markBlockRangeForRenderUpdate(pos, state, state);
+		Saves.removeColor(playerIn);
 	}
 
 	/**
@@ -71,11 +72,11 @@ public class ColorBlockContainer extends Container {
 	}
 
 	public void setColor(int colorIn) {
-		ColorBlockContainerSaves.setOrCreateColor(this.getPlayer().getUniqueID(), colorIn);
+		Saves.setOrCreateColor(this.getPlayer().getUniqueID(), colorIn);
 	}
 
 	public int getColor() {
-		Integer color = ColorBlockContainerSaves.getColor(this.getPlayer());
+		Integer color = Saves.getColor(this.getPlayer());
 		return color != null ? color : -1;
 	}
 

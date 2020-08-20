@@ -1,6 +1,8 @@
 {
 	"item.color_block.color_block": "Farb Block",
 	"block.color_block.color_block": "Farb Block",
+	"item.color_block.image_block": "Bilder Block",
+	"block.color_block.image_block": "Bilder Block",
 	"item.color_block.color_tool": "Farb Werkzeug",
 	"itemgroup.color_block.color_block": "Farb Items & Bloecke",
 	"block.color_block.color_block.error.non_int_value": "Die Farbe auf die ein Farbblock gesetzt wird muss eine Zahl sein. Bitte melde diesen Fehler Nicht!",
@@ -9,5 +11,10 @@
 	"container.color_block": "Wechseln der Block Farbe",
 	"container.number_system_base": "Zahlen System Basis",
 	"itemGroup.color_block": "Farb Block Items",
-	"item.color_block.multi_dye": "Bunter Farbstoff"
+	"item.color_block.multi_dye": "Bunter Farbstoff",
+	"container.image_block": "Einlesen von Bildern",
+	"container.image_block.to_big_image": "Das Eingelesene Bild ist zu groﬂ",
+	"container.rotationButton": "Drehe das Bild",
+	"container.axisButton": "Die Achse des Bildes",
+	"container.image_block.file_non_exists": "Der Pfad existiert nicht"
 }
