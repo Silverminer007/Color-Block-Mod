@@ -18,10 +18,6 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -29,7 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> implements IContainerListener {
+public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ColorBlockScreen.class);
 
@@ -65,7 +61,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 		this.setFocusedDefault(this.nameField);
 		this.nameField.setFocused2(true);
 
-		NumberingSystem system = Saves.getSystem(this.getContainer().getPlayer());
+		NumberingSystem system = Saves.getSystem(this.field_230706_i_.player);
 		system = system == null ? NumberingSystem.DEZ : system;
 
 		this.mode_button = this.func_230480_a_(new ColorBlockScreen.ModeButton(this.getGuiLeft() + 173,
@@ -76,11 +72,15 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 							new TranslationTextComponent("container.number_system_base"), p_238488_2_, p_238488_3_);
 				}, system));
 
-		this.getContainer().setColor(this.mode_button.getZahlenSystem().castStringToInt(this.nameField.getText()));
+		int color = this.getContainer().getColor();
+		String newString = this.mode_button.getZahlenSystem().parseToStringFromDez(color);
+		this.nameField.setText(color == -1 ? "" : newString);
+		this.func_231035_a_(this.nameField);
 	}
 
 	private void updateNameField(String nameFieldString) {
-		this.getContainer().setColor(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString));
+		ColorBlock.setColorStatic(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
+				this.getContainer().getTileEntity().getPos(), this.getContainer().getTileEntity().getWorld());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -121,12 +121,10 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 	protected void func_231160_c_() {
 		super.func_231160_c_();
 		this.func_230453_j_();
-		this.container.addListener(this);
 	}
 
 	public void func_231164_f_() {
 		super.func_231164_f_();
-		this.container.removeListener(this);
 
 		this.field_230706_i_.keyboardListener.enableRepeatEvents(false);
 	}
@@ -135,23 +133,6 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 	protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 		this.field_230712_o_.func_238422_b_(p_230451_1_, this.field_230704_d_, (float) this.field_238742_p_,
 				(float) this.field_238743_q_, 4210752);
-	}
-
-	@Override
-	public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList) {
-		this.sendSlotContents(containerToSend, 0, ItemStack.EMPTY);
-	}
-
-	@Override
-	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-		int color = ColorBlock.getColorStatic(Saves.getPosition(this.getContainer().getPlayer()));
-		String newString = this.mode_button.getZahlenSystem().parseToStringFromDez(color);
-		this.nameField.setText(color == -1 ? "" : newString);
-		this.func_231035_a_(this.nameField);
-	}
-
-	@Override
-	public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue) {
 	}
 
 	public void onButtonPressed() {
@@ -165,7 +146,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> imple
 		this.nameField.setText(castInt == -1 ? "" : newString);
 		this.nameField.setFocused2(true);
 
-		Saves.setOrCreateSystem(this.getContainer().getPlayer(), this.mode_button.getZahlenSystem());
+		Saves.setOrCreateSystem(this.field_230706_i_.player, this.mode_button.getZahlenSystem());
 	}
 
 	public class ModeButton extends Button {

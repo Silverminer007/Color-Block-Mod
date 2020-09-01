@@ -3,7 +3,10 @@ package com.silverminer.color_block.util.math;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Lists;
+import com.silverminer.color_block.util.Config;
 
 import net.minecraft.util.text.StringTextComponent;
 
@@ -86,9 +89,9 @@ public class NumberingSystem {
 	 * @return The Castet Integer or if an Error occures -1
 	 */
 	public int castStringToInt(String stringIn) {
-		if (!stringIn.isEmpty()) {
+		if (!StringUtils.isBlank(stringIn)) {
 			String mTextFieldString = this.removeInvalidChr(stringIn.toLowerCase(Locale.ROOT));
-			if(!mTextFieldString.isEmpty()) {
+			if (!mTextFieldString.isEmpty()) {
 				try {
 					return Integer.parseInt(mTextFieldString, this.getBase());
 				} catch (NumberFormatException e) {
@@ -97,7 +100,7 @@ public class NumberingSystem {
 				}
 			}
 		}
-		return -1;
+		return Config.COLOR_TO_FILL;
 	}
 
 	/**
@@ -150,9 +153,23 @@ public class NumberingSystem {
 	 * @return true if in the given String is an invalid char, otherwise false
 	 */
 	public boolean hasInvaildChar(String str) {
+		return this.hasInvaildChar(str, Lists.newArrayList());
+	}
+
+	/**
+	 * Detects if in the given String is an invalid char
+	 * 
+	 * @param str
+	 * @return true if in the given String have an invalid char, otherwise false
+	 */
+	public boolean hasInvaildChar(String str, ArrayList<Character> ingnoreChars) {
 		for (char ch : str.toCharArray()) {
 			if (!this.isAllowedChar(ch)) {
-				return true;
+				if (!ingnoreChars.contains(ch)) {
+					return true;
+				} else {
+					continue;
+				}
 			}
 		}
 		return false;

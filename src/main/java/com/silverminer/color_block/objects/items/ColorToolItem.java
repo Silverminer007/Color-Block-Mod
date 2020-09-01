@@ -33,21 +33,22 @@ public class ColorToolItem extends Item {
 			ItemStack item = player.getHeldItem(context.getHand());// Holt das Item mit dem geklickt worden ist
 			if (!item.hasDisplayName() || player.isSneaking()) {// Prüft ob diese Situation der Part dieser Funtion oder
 																// der im ColorBlock ist
-				if (!String.valueOf(ColorBlock.getColorStatic(pos)).equals(item.getDisplayName().getString())) {// Prüft
-																												// ob
-																												// der
-																												// zu
+				if (!String.valueOf(ColorBlock.getColorStatic(pos, context.getWorld()))
+						.equals(item.getDisplayName().getString())) {// Prüft
+					// ob
+					// der
+					// zu
 					// setzende Name
 					// ungleich dem
 					// jetztigen
 					// Namen ist
-					item.setDisplayName(new StringTextComponent(String.valueOf(ColorBlock.getColorStatic(pos))));// Setzt
+					item.setDisplayName(new StringTextComponent(String.valueOf(ColorBlock.getColorStatic(pos, context.getWorld()))));// Setzt
 																													// den
 																													// Namen
 					if (context.getWorld().isRemote()) {// Sorgt dafür, dass diese Nachricht nur einmal gesedet wird
 						player.sendMessage(// Informiert den Spieler auf welche Farbe der Name gestzt wrden ist
 								new StringTextComponent("Settet Coloring texture to: "
-										+ String.valueOf(ColorBlock.getColorStatic(pos))),
+										+ String.valueOf(ColorBlock.getColorStatic(pos, context.getWorld()))),
 								PlayerEntity.getUUID(player.getGameProfile()));
 					}
 				}

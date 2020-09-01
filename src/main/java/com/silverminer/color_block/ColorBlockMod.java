@@ -7,8 +7,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import java.util.ArrayList;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,8 +15,8 @@ import com.silverminer.color_block.gui.screen.ImageScreen;
 import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.init.InitItems;
+import com.silverminer.color_block.init.InitTileEntityTypes;
 import com.silverminer.color_block.util.events.ClientEvents;
-import com.silverminer.color_block.util.saves.ColorBlockSaveHelper;
 import com.silverminer.color_block.util.saves.ColorBlocksSavedData;
 
 @Mod(ColorBlockMod.MODID)
@@ -28,10 +26,6 @@ public class ColorBlockMod {
 	public static final Logger LOGGER = LogManager.getLogger(ColorBlockMod.MODID);
 	// The value here should match an entry in the META-INF/mods.toml file
 	public static final String MODID = "color_block";
-
-	// The list of placed Color Blocks. It's an Helper that contains the BlockPos,
-	// the String of Dimension Name and the Color of the Block at the place
-	public static final ArrayList<ColorBlockSaveHelper> COLOR_BLOCKS = new ArrayList<ColorBlockSaveHelper>();
 
 	// This is used to save and read the list on top
 	public static ColorBlocksSavedData colorBlocksSavedData;
@@ -47,6 +41,7 @@ public class ColorBlockMod {
 		InitItems.ITEMS.register(modEventBus);
 		InitBlocks.BLOCKS.register(modEventBus);
 		InitContainerType.CONTAINER.register(modEventBus);
+		InitTileEntityTypes.TILE_ENTITIES.register(modEventBus);
 	}
 
 	/**

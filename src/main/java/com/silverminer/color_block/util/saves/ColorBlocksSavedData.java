@@ -30,15 +30,6 @@ public class ColorBlocksSavedData extends WorldSavedData {
 	 */
 	@Override
 	public void read(CompoundNBT nbt) {
-		ColorBlockMod.COLOR_BLOCKS.clear();// Clear this first to don't double any Object
-		// The Objects are Saved from 0 to the lenght of to saven objects, so let's
-		// start the read in with 0 and go up
-		int i = 0;
-		while (nbt.contains(String.valueOf(i))) {
-			// Call this Method for each element. It will add it to the List in the Method
-			new ColorBlockSaveHelper().deserializeNBT((CompoundNBT) nbt.get(String.valueOf(i)));
-			i++;// Next Element
-		}
 		Saves.deserializeNBT(nbt.getCompound("numbering_system"));
 	}
 
@@ -48,11 +39,6 @@ public class ColorBlocksSavedData extends WorldSavedData {
 	 */
 	@Override
 	public CompoundNBT write(CompoundNBT nbt) {
-		// Let's save the Elements by Index in list.
-		for (ColorBlockSaveHelper helper : ColorBlockMod.COLOR_BLOCKS) {
-			// For all Objects in List put it in the *.nbt file
-			nbt.put(String.valueOf(ColorBlockMod.COLOR_BLOCKS.indexOf(helper)), helper.serializeNBT());
-		}
 		nbt.put("numbering_system", Saves.serializeSystem(new CompoundNBT()));
 		return nbt;
 	}

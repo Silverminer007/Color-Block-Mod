@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,10 +15,8 @@ import org.apache.logging.log4j.Logger;
 import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
+import com.silverminer.color_block.objects.tile_entity.ImageTileEntity;
 import com.silverminer.color_block.util.Config;
-import com.silverminer.color_block.util.saves.ColorBlockSaveHelper;
-import com.silverminer.color_block.util.saves.ImageTransferPacket;
-import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -24,6 +24,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.Rotation;
@@ -38,14 +39,27 @@ public class ImageContainer extends Container {
 	protected final IWorldPosCallable iWorld;
 	protected final PlayerEntity player;
 
-	public ImageContainer(int windowId, PlayerInventory playerInventory, IWorldPosCallable iWorld) {
+	protected final ImageTileEntity tileEntity;
+
+	public ImageContainer(int windowId, PlayerInventory playerInventory, ImageTileEntity tileEntityIn) {
 		super(InitContainerType.IMAGE_CONTAINER.get(), windowId);
-		this.iWorld = iWorld;
+		this.iWorld = IWorldPosCallable.of(tileEntityIn.getWorld(), tileEntityIn.getPos());
 		this.player = playerInventory.player;
+		this.tileEntity = tileEntityIn;
 	}
 
 	public ImageContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data) {
-		this(windowId, playerInv, IWorldPosCallable.DUMMY);
+		this(windowId, playerInv, getTileEntity(playerInv, data));
+	}
+
+	public static ImageTileEntity getTileEntity(PlayerInventory playerInventory, PacketBuffer data) {
+		Objects.requireNonNull(playerInventory, "playerInventory cannot be null");
+		Objects.requireNonNull(data, "data cannot be null");
+		final TileEntity tileAtPos = playerInventory.player.getEntityWorld().getTileEntity(data.readBlockPos());
+		if (tileAtPos instanceof ImageTileEntity) {
+			return (ImageTileEntity) tileAtPos;
+		}
+		throw new IllegalStateException("Tile entity is not correct! " + tileAtPos);
 	}
 
 	public boolean isRightBlock(BlockState state) {
@@ -57,23 +71,29 @@ public class ImageContainer extends Container {
 	 */
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
+	}
+
+	public void buildImage(@Nullable PlayerEntity playerIn) {
 		try {
-			ImageTransferPacket packet = Saves.getImageOrDefault(playerIn, new ImageTransferPacket());
-			File file = packet.getFile();
+			File file = this.tileEntity.getFile();
 			file = file == null ? new File("") : file;
 			if (file.exists() && !file.isDirectory()) {
-				BlockPos pos = Saves.getPosition(playerIn).add(packet.getOffsetPos());
-				World playerWorld = playerIn.getEntityWorld();
+				BlockPos pos = this.tileEntity.getPos().add(this.tileEntity.getOffsetPos());
+				World world = this.tileEntity.getWorld();
+				LOGGER.info("World is Remote: {}", world.isRemote());
+				LOGGER.info("Is this.player.getEntityWorld() Remote: {}", this.player.getEntityWorld().isRemote());
+				LOGGER.info("Is Player World Remote: {}",
+						playerIn == null ? null : playerIn.getEntityWorld().isRemote());
 				BufferedImage image = ImageIO.read(file);
 				int imageX = image.getWidth(), imageY = image.getHeight();
 
-				Rotation rot = packet.getRotation();
-				Axis axis = packet.getAxis();
+				Rotation rot = this.tileEntity.getRotation();
+				Axis axis = this.tileEntity.getAxis();
 
 				if ((imageX <= Config.IMAGE_MAX_X && imageY <= Config.IMAGE_MAX_Y) || Config.IGNORE_IMAGE_SIZE) {
 					for (int x = 0; x < imageX; x++) {
 						for (int y = 0; y < imageY; y++) {
-							BlockPos position = new BlockPos(-1, -1, -1);
+							BlockPos position = BlockPos.ZERO;
 							int posX = 0, posY = 0;
 							switch (rot) {
 							case NONE:
@@ -109,30 +129,32 @@ public class ImageContainer extends Container {
 
 							int color = getColor(x, y, image);
 							if (!(color < 0)) {
-								ColorBlock.addColor(new ColorBlockSaveHelper(position, color,
-										playerWorld.func_230315_m_().toString()));
-
-								playerWorld.setBlockState(position, InitBlocks.COLOR_BLOCK.get().getDefaultState());
-								BlockState state = playerWorld.getBlockState(position);
-								playerWorld.markBlockRangeForRenderUpdate(position, state, state);
-								playerWorld.notifyBlockUpdate(position, state, state, 64);
+								BlockState state = InitBlocks.COLOR_BLOCK.get().getDefaultState();
+								world.setBlockState(position, state);
+								if (state.getBlock().hasTileEntity(state)) {
+									world.addTileEntity(state.getBlock().createTileEntity(state, world));
+									ColorBlock.setColorStatic(color, position, world);
+								}
+								state = world.getBlockState(position);
+								world.markBlockRangeForRenderUpdate(position, state, state);
+								world.notifyBlockUpdate(position, state, state, 64);
 							} else {
-								playerWorld.setBlockState(position, Blocks.AIR.getDefaultState());
+								world.setBlockState(position, Blocks.AIR.getDefaultState());
 							}
 							continue;
 						}
 					}
 				} else {
-					if (playerWorld.isRemote()) {
-						playerIn.sendMessage(new TranslationTextComponent("container.image_block.to_big_image"),
-								playerIn.getUniqueID());
+					if (world.isRemote()) {
+						this.player.sendMessage(new TranslationTextComponent("container.image_block.to_big_image"),
+								this.player.getUniqueID());
 					}
 				}
 			} else {
 				if (file != new File("")) {
-					if (playerIn.getEntityWorld().isRemote()) {
-						playerIn.sendMessage(new TranslationTextComponent("container.image_block.file_non_exists"),
-								playerIn.getUniqueID());
+					if (this.tileEntity.getWorld().isRemote()) {
+						this.player.sendMessage(new TranslationTextComponent("container.image_block.file_non_exists"),
+								this.player.getUniqueID());
 					}
 				}
 			}
@@ -160,9 +182,13 @@ public class ImageContainer extends Container {
 		// Alpha ist die Transparenz. 0 steht für Transparent.
 		// Also Wenn der Pixel Transparent ist soll er dies als Weiß darstellen
 		if (color.getAlpha() == 0) {
+			// Die nutzung der Einstellung ob leere pixel gefüllt werden sollen
 			if (Config.FILL_EMPTY_PIXEL) {
+				// Färbt den Pixel auf die dafür eingestellte Farbe
 				return Config.COLOR_TO_FILL;
 			} else {
+				// Gibt einen negativen wert zurück damit erkannt wird, dass der Pixel nicht
+				// gefüllt werden soll
 				return -1;
 			}
 		}
@@ -175,7 +201,7 @@ public class ImageContainer extends Container {
 		return rgb;
 	}
 
-	public PlayerEntity getPlayer() {
-		return this.player;
+	public ImageTileEntity getTileEntity() {
+		return this.tileEntity;
 	}
 }

@@ -27,7 +27,7 @@ public class ClientEvents {
 		event.getBlockColors().register(new IBlockColor() {
 			@Override
 			public int getColor(BlockState state, IBlockDisplayReader displayReader, BlockPos pos, int tintindex) {
-				return ColorBlock.getColorStatic(pos);
+				return ColorBlock.getColorStatic(displayReader.getTileEntity(pos));
 			}
 		}, InitBlocks.COLOR_BLOCK.get());// The Block that it should be colored
 	}

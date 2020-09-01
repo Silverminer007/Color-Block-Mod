@@ -16,5 +16,6 @@
 	"container.image_block.to_big_image": "Das Eingelesene Bild ist zu groﬂ",
 	"container.rotationButton": "Drehe das Bild",
 	"container.axisButton": "Die Achse des Bildes",
-	"container.image_block.file_non_exists": "Der Pfad existiert nicht"
+	"container.image_block.file_non_exists": "Der Pfad existiert nicht",
+	"container.finish": "Fertig"
 }

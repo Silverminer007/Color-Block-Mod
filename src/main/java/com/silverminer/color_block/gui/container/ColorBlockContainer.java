@@ -1,19 +1,21 @@
 package com.silverminer.color_block.gui.container;
 
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
-import com.silverminer.color_block.util.saves.Saves;
+import com.silverminer.color_block.objects.tile_entity.ColorBlockTileEntity;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,14 +27,27 @@ public class ColorBlockContainer extends Container {
 	protected final IWorldPosCallable iWorld;
 	protected final PlayerEntity player;
 
-	public ColorBlockContainer(int windowId, PlayerInventory playerInventory, IWorldPosCallable iWorld) {
-		super(InitContainerType.COLOR_BLOCK.get(), windowId);
-		this.iWorld = iWorld;
-		this.player = playerInventory.player;
-	}
+	protected final ColorBlockTileEntity tileEntity;
 
 	public ColorBlockContainer(final int windowId, final PlayerInventory playerInv, final PacketBuffer data) {
-		this(windowId, playerInv, IWorldPosCallable.DUMMY);
+		this(windowId, playerInv, getTileEntity(playerInv, data));
+	}
+
+	public ColorBlockContainer(int id, PlayerInventory playerInventory, ColorBlockTileEntity colorBlockTileEntity) {
+		super(InitContainerType.COLOR_BLOCK.get(), id);
+		this.iWorld = IWorldPosCallable.of(colorBlockTileEntity.getWorld(), colorBlockTileEntity.getPos());
+		this.player = playerInventory.player;
+		this.tileEntity = colorBlockTileEntity;
+	}
+
+	public static ColorBlockTileEntity getTileEntity(PlayerInventory playerInventory, PacketBuffer data) {
+		Objects.requireNonNull(playerInventory, "playerInventory cannot be null");
+		Objects.requireNonNull(data, "data cannot be null");
+		final TileEntity tileAtPos = playerInventory.player.world.getTileEntity(data.readBlockPos());
+		if (tileAtPos instanceof ColorBlockTileEntity) {
+			return (ColorBlockTileEntity) tileAtPos;
+		}
+		throw new IllegalStateException("Tile entity is not correct! " + tileAtPos);
 	}
 
 	public boolean func_230302_a_(BlockState state) {
@@ -44,20 +59,15 @@ public class ColorBlockContainer extends Container {
 	 */
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
-		BlockPos pos = Saves.getPosition(playerIn);
+		BlockPos pos = this.tileEntity.getPos();
 		World playerWorld = playerIn.getEntityWorld();
 		BlockState state = playerWorld.getBlockState(pos);
-		Block block = state.getBlock();
-		if (block instanceof ColorBlock) {
-			ColorBlock colorBlock = (ColorBlock) block;
-			if (this.getColor() != -1) {
-				colorBlock.setColor(this.getColor(), pos);
-			}
+		if (this.getColor() != -1) {
+			ColorBlock.setColorStatic(this.getColor(), pos, playerWorld);
 		}
 		playerWorld.setBlockState(pos, state, 64);
 		playerWorld.notifyBlockUpdate(pos, state, state, 64);
 		playerWorld.markBlockRangeForRenderUpdate(pos, state, state);
-		Saves.removeColor(playerIn);
 	}
 
 	/**
@@ -71,16 +81,11 @@ public class ColorBlockContainer extends Container {
 		}, true);
 	}
 
-	public void setColor(int colorIn) {
-		Saves.setOrCreateColor(this.getPlayer().getUniqueID(), colorIn);
-	}
-
 	public int getColor() {
-		Integer color = Saves.getColor(this.getPlayer());
-		return color != null ? color : -1;
+		return ColorBlock.getColorStatic(this.tileEntity.getPos(), this.tileEntity.getWorld());
 	}
 
-	public PlayerEntity getPlayer() {
-		return this.player;
+	public ColorBlockTileEntity getTileEntity() {
+		return this.tileEntity;
 	}
 }
