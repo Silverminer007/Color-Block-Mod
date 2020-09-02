@@ -17,6 +17,8 @@ import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.objects.tile_entity.ImageTileEntity;
 import com.silverminer.color_block.util.Config;
+import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
+import com.silverminer.color_block.util.network.ImageDataPacket;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -73,22 +75,24 @@ public class ImageContainer extends Container {
 		super.onContainerClosed(playerIn);
 	}
 
-	public void buildImage(@Nullable PlayerEntity playerIn) {
+	public void buildImage() {
+		ImageContainer.buildImage(this.getTileEntity().getWorld(), this.getTileEntity().getFile(),
+				this.getTileEntity().getPos(), this.getTileEntity().getOffsetPos(), this.getTileEntity().getRotation(),
+				this.getTileEntity().getAxis(), null);
+
+		ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
+				this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
+				this.getTileEntity().getRotation().toString(), this.getTileEntity().getAxis().toString()));
+	}
+
+	public static void buildImage(World world, File file, BlockPos pos, BlockPos offsetPos, Rotation rot, Axis axis,
+			@Nullable PlayerEntity player) {
 		try {
-			File file = this.tileEntity.getFile();
 			file = file == null ? new File("") : file;
 			if (file.exists() && !file.isDirectory()) {
-				BlockPos pos = this.tileEntity.getPos().add(this.tileEntity.getOffsetPos());
-				World world = this.tileEntity.getWorld();
-				LOGGER.info("World is Remote: {}", world.isRemote());
-				LOGGER.info("Is this.player.getEntityWorld() Remote: {}", this.player.getEntityWorld().isRemote());
-				LOGGER.info("Is Player World Remote: {}",
-						playerIn == null ? null : playerIn.getEntityWorld().isRemote());
+				pos = pos.add(offsetPos);
 				BufferedImage image = ImageIO.read(file);
 				int imageX = image.getWidth(), imageY = image.getHeight();
-
-				Rotation rot = this.tileEntity.getRotation();
-				Axis axis = this.tileEntity.getAxis();
 
 				if ((imageX <= Config.IMAGE_MAX_X && imageY <= Config.IMAGE_MAX_Y) || Config.IGNORE_IMAGE_SIZE) {
 					for (int x = 0; x < imageX; x++) {
@@ -145,17 +149,15 @@ public class ImageContainer extends Container {
 						}
 					}
 				} else {
-					if (world.isRemote()) {
-						this.player.sendMessage(new TranslationTextComponent("container.image_block.to_big_image"),
-								this.player.getUniqueID());
+					if (world.isRemote() && player != null) {
+						player.sendMessage(new TranslationTextComponent("container.image_block.to_big_image"),
+								player.getUniqueID());
 					}
 				}
 			} else {
-				if (file != new File("")) {
-					if (this.tileEntity.getWorld().isRemote()) {
-						this.player.sendMessage(new TranslationTextComponent("container.image_block.file_non_exists"),
-								this.player.getUniqueID());
-					}
+				if (file != new File("") && player != null && world.isRemote()) {
+					player.sendMessage(new TranslationTextComponent("container.image_block.file_non_exists"),
+							player.getUniqueID());
 				}
 			}
 		} catch (IOException e) {

@@ -9,6 +9,8 @@ import com.silverminer.color_block.init.InitItems;
 import com.silverminer.color_block.init.InitTileEntityTypes;
 import com.silverminer.color_block.objects.items.ColorToolItem;
 import com.silverminer.color_block.objects.tile_entity.ColorBlockTileEntity;
+import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
+import com.silverminer.color_block.util.network.SColorChangePacket;
 import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.Block;
@@ -109,11 +111,15 @@ public class ColorBlock extends Block {
 		}
 
 		else if (item.getItem() == InitItems.MULTI_DYE.get()) {
-			/**
-			 * The int in Random.nextInt(int) is one higher that the max Color to have the
-			 * chance of all colors
-			 */
-			ColorBlock.setColorStatic((new Random()).nextInt(16777216), pos, worldIn);
+			if (!worldIn.isRemote()) {
+				/**
+				 * The int in Random.nextInt(int) is one higher that the max Color to have the
+				 * chance of all colors
+				 */
+				int color = (new Random()).nextInt(16777216);
+				ColorBlock.setColorStatic(color, pos, worldIn);
+				ColorBlockPacketHandler.sendToAll(new SColorChangePacket(color, pos, player.getEntityId()));
+			}
 		}
 
 		else {// Öffnet die GUI

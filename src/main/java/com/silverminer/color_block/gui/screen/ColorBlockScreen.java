@@ -9,8 +9,9 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
-import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.util.math.NumberingSystem;
+import com.silverminer.color_block.util.network.CColorChangePacket;
+import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
 import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.client.Minecraft;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -79,8 +81,11 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 	}
 
 	private void updateNameField(String nameFieldString) {
-		ColorBlock.setColorStatic(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
-				this.getContainer().getTileEntity().getPos(), this.getContainer().getTileEntity().getWorld());
+//		ColorBlock.setColorStatic(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
+//				this.getContainer().getTileEntity().getPos(), this.getContainer().getTileEntity().getWorld());
+
+		this.setColor(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
+				this.getContainer().getTileEntity().getPos());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -133,6 +138,10 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 	protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 		this.field_230712_o_.func_238422_b_(p_230451_1_, this.field_230704_d_, (float) this.field_238742_p_,
 				(float) this.field_238743_q_, 4210752);
+	}
+
+	public void setColor(int color, BlockPos position) {
+		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position));
 	}
 
 	public void onButtonPressed() {

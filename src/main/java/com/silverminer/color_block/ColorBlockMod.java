@@ -17,6 +17,7 @@ import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.init.InitItems;
 import com.silverminer.color_block.init.InitTileEntityTypes;
 import com.silverminer.color_block.util.events.ClientEvents;
+import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
 import com.silverminer.color_block.util.saves.ColorBlocksSavedData;
 
 @Mod(ColorBlockMod.MODID)
@@ -42,6 +43,8 @@ public class ColorBlockMod {
 		InitBlocks.BLOCKS.register(modEventBus);
 		InitContainerType.CONTAINER.register(modEventBus);
 		InitTileEntityTypes.TILE_ENTITIES.register(modEventBus);
+
+		ColorBlockPacketHandler.register();
 	}
 
 	/**

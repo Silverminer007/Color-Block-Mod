@@ -155,7 +155,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 	}
 
 	public void onFinishButtonPressed() {
-		this.getContainer().buildImage(null);
+		this.getContainer().buildImage();
 		this.field_230706_i_.displayGuiScreen((Screen) null);
 	}
 
