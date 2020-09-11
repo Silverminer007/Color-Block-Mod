@@ -16,6 +16,6 @@
     "container.image_block.to_big_image": "The read-in Image is to big",
     "container.rotationButton": "Rotate The Image",
     "container.axisButton": "The Axis of the Image",
-    "container.image_block.file_non_exists": "The given File doesn't exists'",
+    "container.image_block.file_non_exists": "The given File %s doesn't exists'",
     "container.finish": "Finish"
 }

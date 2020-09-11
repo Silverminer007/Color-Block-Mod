@@ -51,8 +51,6 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 
 	private RotationButton rotationButton;
 
-	public static File image_path = new File(Minecraft.getInstance().gameDir.getAbsoluteFile() + "\\Images");
-
 	public boolean has_error = true;
 
 	public ImageScreen(ImageContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
@@ -161,7 +159,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 
 	private void updateNameField(String nameFieldString) {
 		File file = !org.apache.commons.lang3.StringUtils.isBlank(nameFieldString)
-				? new File(image_path + "\\" + nameFieldString + ".png")
+				? new File(ColorBlockMod.image_path + "\\" + nameFieldString + ".png")
 				: new File("");
 
 		this.has_error = !file.exists();
@@ -302,7 +300,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 
 	@Override
 	protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
-		this.field_230712_o_.func_238422_b_(p_230451_1_, this.field_230704_d_, (float) this.field_238742_p_,
+		this.field_230712_o_.func_243248_b(p_230451_1_, this.field_230704_d_, (float) this.field_238742_p_,
 				(float) this.field_238743_q_, 4210752);
 	}
 

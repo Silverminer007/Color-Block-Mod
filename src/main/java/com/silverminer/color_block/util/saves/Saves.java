@@ -29,7 +29,9 @@ public final class Saves {
 			Saves.SYSTEM_BY_PLAYER_UUID.remove(uuid);
 		}
 		Saves.SYSTEM_BY_PLAYER_UUID.putIfAbsent(uuid, system);
-		ColorBlockMod.colorBlocksSavedData.markDirty();
+		if (ColorBlockMod.colorBlocksSavedData != null) {
+			ColorBlockMod.colorBlocksSavedData.markDirty();
+		}
 	}
 
 	public static void setOrCreateSystem(@Nonnull PlayerEntity player, @Nonnull NumberingSystem system) {
@@ -39,7 +41,9 @@ public final class Saves {
 	public static boolean removeSystem(UUID uuid) {
 		if (Saves.SYSTEM_BY_PLAYER_UUID.containsKey(uuid)) {
 			Saves.SYSTEM_BY_PLAYER_UUID.remove(uuid);
-			ColorBlockMod.colorBlocksSavedData.markDirty();
+			if (ColorBlockMod.colorBlocksSavedData != null) {
+				ColorBlockMod.colorBlocksSavedData.markDirty();
+			}
 			return true;
 		}
 		return false;
@@ -52,7 +56,7 @@ public final class Saves {
 	public static CompoundNBT serializeSystem(CompoundNBT nbt) {
 		int i = 0;
 		Iterator<UUID> iterator = SYSTEM_BY_PLAYER_UUID.keySet().iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			UUID uuid = iterator.next();
 			if (SYSTEM_BY_PLAYER_UUID.containsKey(uuid)) {
 				CompoundNBT tag = new CompoundNBT();

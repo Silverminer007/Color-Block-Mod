@@ -73,16 +73,21 @@ public class ImageContainer extends Container {
 	 */
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
+		if (playerIn.getEntityWorld().isRemote()) {
+			ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
+					this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
+					this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal(), false));
+		}
 	}
 
 	public void buildImage() {
+		ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
+				this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
+				this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal(), true));
+
 		ImageContainer.buildImage(this.getTileEntity().getWorld(), this.getTileEntity().getFile(),
 				this.getTileEntity().getPos(), this.getTileEntity().getOffsetPos(), this.getTileEntity().getRotation(),
 				this.getTileEntity().getAxis(), null);
-
-		ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
-				this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
-				this.getTileEntity().getRotation().toString(), this.getTileEntity().getAxis().toString()));
 	}
 
 	public static void buildImage(World world, File file, BlockPos pos, BlockPos offsetPos, Rotation rot, Axis axis,
@@ -155,8 +160,9 @@ public class ImageContainer extends Container {
 					}
 				}
 			} else {
-				if (file != new File("") && player != null && world.isRemote()) {
-					player.sendMessage(new TranslationTextComponent("container.image_block.file_non_exists"),
+				if (file != new File("") && player != null && !world.isRemote()) {
+					player.sendMessage(
+							new TranslationTextComponent("container.image_block.file_non_exists", file.toString()),
 							player.getUniqueID());
 				}
 			}

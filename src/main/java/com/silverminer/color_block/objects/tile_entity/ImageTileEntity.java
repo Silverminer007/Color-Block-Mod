@@ -119,8 +119,8 @@ public class ImageTileEntity extends TileEntity implements INamedContainerProvid
 	public CompoundNBT write(CompoundNBT nbt) {
 		nbt.putString("file", this.file.toString());
 		nbt.putLong("pos", this.getOffsetPos().toLong());
-		nbt.putString("rotation", this.rot.toString());
-		nbt.putString("axis", this.axis.toString());
+		nbt.putInt("rotation", this.rot.ordinal());
+		nbt.putInt("axis", this.axis.ordinal());
 		return super.write(nbt);
 	}
 
@@ -135,16 +135,16 @@ public class ImageTileEntity extends TileEntity implements INamedContainerProvid
 			this.setYOffset(pos.getY());
 			this.setZOffset(pos.getZ());
 		}
-		if (nbt.contains("rotation", 8)) {
+		if (nbt.contains("rotation", 3)) {
 			try {
-				this.rot = Rotation.valueOf(nbt.getString("rotation"));
+				this.rot = Rotation.values()[nbt.getInt("rotation")];
 			} catch (IllegalArgumentException e) {
 				this.rot = Rotation.NONE;
 			}
 		}
-		if (nbt.contains("axis", 8)) {
+		if (nbt.contains("axis", 3)) {
 			try {
-				this.axis = Axis.valueOf(nbt.getString("axis"));
+				this.axis = Axis.values()[nbt.getInt("axis")];
 			} catch (IllegalArgumentException e) {
 				this.axis = Axis.Y;
 			}

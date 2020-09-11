@@ -59,7 +59,6 @@ public class ColorBlockTileEntity extends TileEntity implements INamedContainerP
 		super.func_230337_a_(state, nbt);
 		if (nbt.contains("color", 3)) {
 			ColorBlock.setColorStatic(nbt.getInt("color"), this);
-			this.markDirty();
 		}
 	}
 

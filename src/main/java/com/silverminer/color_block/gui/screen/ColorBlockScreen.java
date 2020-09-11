@@ -9,11 +9,14 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
+import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.util.math.NumberingSystem;
 import com.silverminer.color_block.util.network.CColorChangePacket;
 import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
+import com.silverminer.color_block.util.network.SystemChangePacket;
 import com.silverminer.color_block.util.saves.Saves;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -23,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -63,8 +67,13 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 		this.setFocusedDefault(this.nameField);
 		this.nameField.setFocused2(true);
 
-		NumberingSystem system = Saves.getSystem(this.field_230706_i_.player);
-		system = system == null ? NumberingSystem.DEZ : system;
+		NumberingSystem system;
+		try {
+			system = Saves.getSystem(this.field_230706_i_.player);
+			system = system == null ? NumberingSystem.DEZ : system;
+		} catch (Throwable e) {
+			system = NumberingSystem.DEZ;
+		}
 
 		this.mode_button = this.func_230480_a_(new ColorBlockScreen.ModeButton(this.getGuiLeft() + 173,
 				this.getGuiTop() + 18, 20, 20, system.getTextComponent(), (on_Button_Pressed) -> {
@@ -81,9 +90,6 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 	}
 
 	private void updateNameField(String nameFieldString) {
-//		ColorBlock.setColorStatic(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
-//				this.getContainer().getTileEntity().getPos(), this.getContainer().getTileEntity().getWorld());
-
 		this.setColor(this.mode_button.getZahlenSystem().castStringToInt(nameFieldString),
 				this.getContainer().getTileEntity().getPos());
 	}
@@ -135,13 +141,21 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 	}
 
 	@Override
-	protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
-		this.field_230712_o_.func_238422_b_(p_230451_1_, this.field_230704_d_, (float) this.field_238742_p_,
+	protected void func_230451_b_(MatrixStack matrix, int p_230451_2_, int p_230451_3_) {
+		this.field_230712_o_.func_243248_b(matrix, this.field_230704_d_, (float) this.field_238742_p_,
 				(float) this.field_238743_q_, 4210752);
 	}
 
 	public void setColor(int color, BlockPos position) {
+		ColorBlock.setColorStatic(color, this.getContainer().getTileEntity());
 		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position));
+		World world = this.getContainer().getTileEntity().getWorld();
+		if (world == null)
+			return;
+		BlockState state = world.getBlockState(position);
+		world.setBlockState(position, state, 64);// Sorgt dafür, dass änderungen übernommen werden
+		world.notifyBlockUpdate(position, state, state, 0);
+		world.markBlockRangeForRenderUpdate(position, state, state);// Sorgt für die veränderungen der Textur
 	}
 
 	public void onButtonPressed() {
@@ -155,7 +169,13 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 		this.nameField.setText(castInt == -1 ? "" : newString);
 		this.nameField.setFocused2(true);
 
-		Saves.setOrCreateSystem(this.field_230706_i_.player, this.mode_button.getZahlenSystem());
+		if (this.field_230706_i_ != null) {
+			if (this.field_230706_i_.player != null) {
+				Saves.setOrCreateSystem(this.field_230706_i_.player, this.mode_button.getZahlenSystem());
+				ColorBlockPacketHandler
+						.sendToServer(new SystemChangePacket(this.mode_button.getZahlenSystem().getBase()));
+			}
+		}
 	}
 
 	public class ModeButton extends Button {

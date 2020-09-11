@@ -15,31 +15,70 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 public class ColorBlockPacketHandler {
 
 	protected static final Logger LOGGER = LogManager.getLogger(ColorBlockPacketHandler.class);
-	private static final String PROTOCOL_VERSION = "1.0";
+
+	/**
+	 * Diese Zahl kann hochezählt werden, wenn sich etwas an den Packeten oder
+	 * ähnliches ändert, damit Server und Client die gleichen Packete bzw. Versionen
+	 * haben
+	 */
+	public static final String PROTOCOL_VERSION = "1.2";
+
+	/**
+	 * Das ist die Instanz über die Server und Client Kommunizieren.
+	 */
 	public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
 			.named(new ResourceLocation(ColorBlockMod.MODID, "main_channel"))
 			.clientAcceptedVersions(PROTOCOL_VERSION::equals).serverAcceptedVersions(PROTOCOL_VERSION::equals)
 			.networkProtocolVersion(() -> PROTOCOL_VERSION).simpleChannel();
 
+	/**
+	 * Hier müssen alle Packete registiert werden die irgendwann gesewndet werden
+	 * sollen, damit Minecraft weiß wie es das Packet hand haben soll. id++ wird
+	 * benutz um wirklich einmalige ids zu haben
+	 */
 	public static void register() {
-		CHANNEL.registerMessage(0, SColorChangePacket.class, SColorChangePacket::encode, SColorChangePacket::decode,
+		int id = 0;
+		CHANNEL.registerMessage(id++, SColorChangePacket.class, SColorChangePacket::encode, SColorChangePacket::decode,
 				SColorChangePacket::handle);
 
-		CHANNEL.registerMessage(1, CColorChangePacket.class, CColorChangePacket::encode, CColorChangePacket::decode,
+		CHANNEL.registerMessage(id++, CColorChangePacket.class, CColorChangePacket::encode, CColorChangePacket::decode,
 				CColorChangePacket::handle);
 
-		CHANNEL.registerMessage(2, ImageDataPacket.class, ImageDataPacket::encode, ImageDataPacket::decode,
+		CHANNEL.registerMessage(id++, ImageDataPacket.class, ImageDataPacket::encode, ImageDataPacket::decode,
 				ImageDataPacket::handle);
+
+		CHANNEL.registerMessage(id++, SystemChangePacket.class, SystemChangePacket::encode, SystemChangePacket::decode,
+				SystemChangePacket::handle);
 	}
 
+	/**
+	 * Diese Funktion sendet das registriete übergebene Packet an den übergebenen
+	 * Spieler. Das Packet muss vorher in der {@link #register()} Funktion
+	 * registiert werden
+	 * 
+	 * @param message
+	 * @param player
+	 */
 	public static void sendTo(Object message, PlayerEntity player) {
 		CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), message);
 	}
 
+	/**
+	 * Diese Funktion sendet das registriete übergebene Packet an alle Klienten. Das
+	 * Packet muss vorher in der {@link #register()} Funktion registiert werden
+	 * 
+	 * @param message
+	 */
 	public static void sendToAll(Object message) {
 		CHANNEL.send(PacketDistributor.ALL.noArg(), message);
 	}
 
+	/**
+	 * Diese Funktion sendet das übergebene Packet an vom Klienten zum Server. Das
+	 * Packet muss vorher in der {@link #register()} Funktion registiert werden
+	 * 
+	 * @param message
+	 */
 	public static void sendToServer(Object message) {
 		CHANNEL.sendToServer(message);
 	}

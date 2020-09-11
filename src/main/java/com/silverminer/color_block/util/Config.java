@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.silverminer.color_block.gui.screen.ImageScreen;
+import com.silverminer.color_block.ColorBlockMod;
 
 public class Config {
 
@@ -32,7 +32,7 @@ public class Config {
 					+ "Ignore_Image_Size=false #Take Off the two settings below. The Game will ignore the Size and simply build the Image\r\n"
 					+ "Fill_empty_pixel=true #If true empty pixel will be placed with white Block. Other way the pixel will be replaced with air\r\n"
 					+ "Color_to_fill=16777215 #If line below is true, this takes with which color the empty pixel are filled(In rgb-Dezimal - Default: White(16777215))";
-			File file = new File(ImageScreen.image_path + "\\Config");
+			File file = new File(ColorBlockMod.image_path + "\\Config");
 			if (!file.exists()) {
 				file.mkdir();
 			}
