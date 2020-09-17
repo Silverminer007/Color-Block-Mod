@@ -21,7 +21,7 @@ public class ColorBlockPacketHandler {
 	 * ähnliches ändert, damit Server und Client die gleichen Packete bzw. Versionen
 	 * haben
 	 */
-	public static final String PROTOCOL_VERSION = "1.2";
+	public static final String PROTOCOL_VERSION = "1.3";
 
 	/**
 	 * Das ist die Instanz über die Server und Client Kommunizieren.
@@ -47,8 +47,8 @@ public class ColorBlockPacketHandler {
 		CHANNEL.registerMessage(id++, ImageDataPacket.class, ImageDataPacket::encode, ImageDataPacket::decode,
 				ImageDataPacket::handle);
 
-		CHANNEL.registerMessage(id++, SystemChangePacket.class, SystemChangePacket::encode, SystemChangePacket::decode,
-				SystemChangePacket::handle);
+		CHANNEL.registerMessage(id++, SavesChangePacket.class, SavesChangePacket::encode, SavesChangePacket::decode,
+				SavesChangePacket::handle);
 	}
 
 	/**

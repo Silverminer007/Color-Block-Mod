@@ -6,7 +6,6 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
-import com.silverminer.color_block.util.Config;
 
 import net.minecraft.util.text.StringTextComponent;
 
@@ -95,12 +94,11 @@ public class NumberingSystem {
 				try {
 					return Integer.parseInt(mTextFieldString, this.getBase());
 				} catch (NumberFormatException e) {
-					e.printStackTrace();
 					return -1;
 				}
 			}
 		}
-		return Config.COLOR_TO_FILL;
+		return 0xffffff;
 	}
 
 	/**

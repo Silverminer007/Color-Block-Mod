@@ -88,7 +88,7 @@ public class ColorBlock extends Block {
 					 * Holt die Zahl auf die die Farbe gesetzt werden soll
 					 */
 					String text = item.getDisplayName().getString();
-					int color = Saves.getSystem(player).castStringToInt(text);
+					int color = Saves.getSaves(player).getSystem().castStringToInt(text);
 					ColorBlock.setColorStatic(color == -1 ? getColorStatic(pos, worldIn) : color, pos, worldIn);
 				} catch (NumberFormatException numberformatexception) {
 					/**

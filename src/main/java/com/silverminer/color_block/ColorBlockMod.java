@@ -40,6 +40,7 @@ public class ColorBlockMod {
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			image_path = new File(Minecraft.getInstance().gameDir.getAbsoluteFile(), "Images");
 		}
+
 		final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 		modEventBus.register(ClientEvents.class);

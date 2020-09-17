@@ -17,5 +17,9 @@
     "container.rotationButton": "Rotate The Image",
     "container.axisButton": "The Axis of the Image",
     "container.image_block.file_non_exists": "The given File %s doesn't exists'",
-    "container.finish": "Finish"
+    "container.finish": "Finish",
+    "config.color_block.reload_config": "Game reloaded your Image Config",
+    "container.advanced": "Advanced Mode",
+    "container.use_max_image_size": "Ignore the Size of the Image that you want to build",
+    "container.fill_empty_pixel": "Fill Empty Pixels of the Image"
 }

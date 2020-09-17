@@ -16,9 +16,11 @@ import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.objects.tile_entity.ImageTileEntity;
-import com.silverminer.color_block.util.Config;
+import com.silverminer.color_block.util.network.CColorChangePacket;
 import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
 import com.silverminer.color_block.util.network.ImageDataPacket;
+import com.silverminer.color_block.util.saves.PlayerSaves;
+import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -76,18 +78,14 @@ public class ImageContainer extends Container {
 		if (playerIn.getEntityWorld().isRemote()) {
 			ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
 					this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
-					this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal(), false));
+					this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal()));
 		}
 	}
 
-	public void buildImage() {
-		ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
-				this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
-				this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal(), true));
-
+	public void buildImage(PlayerEntity player) {
 		ImageContainer.buildImage(this.getTileEntity().getWorld(), this.getTileEntity().getFile(),
 				this.getTileEntity().getPos(), this.getTileEntity().getOffsetPos(), this.getTileEntity().getRotation(),
-				this.getTileEntity().getAxis(), null);
+				this.getTileEntity().getAxis(), player);
 	}
 
 	public static void buildImage(World world, File file, BlockPos pos, BlockPos offsetPos, Rotation rot, Axis axis,
@@ -98,8 +96,9 @@ public class ImageContainer extends Container {
 				pos = pos.add(offsetPos);
 				BufferedImage image = ImageIO.read(file);
 				int imageX = image.getWidth(), imageY = image.getHeight();
+				PlayerSaves saves = player == null ? new PlayerSaves() : Saves.getSaves(player);
 
-				if ((imageX <= Config.IMAGE_MAX_X && imageY <= Config.IMAGE_MAX_Y) || Config.IGNORE_IMAGE_SIZE) {
+				if ((imageX <= saves.getMaxImageX() && imageY <= saves.getMaxImageY()) || saves.ignoreImageSize()) {
 					for (int x = 0; x < imageX; x++) {
 						for (int y = 0; y < imageY; y++) {
 							BlockPos position = BlockPos.ZERO;
@@ -136,7 +135,7 @@ public class ImageContainer extends Container {
 								break;
 							}
 
-							int color = getColor(x, y, image);
+							int color = getColor(x, y, image, saves);
 							if (!(color < 0)) {
 								BlockState state = InitBlocks.COLOR_BLOCK.get().getDefaultState();
 								world.setBlockState(position, state);
@@ -150,6 +149,9 @@ public class ImageContainer extends Container {
 							} else {
 								world.setBlockState(position, Blocks.AIR.getDefaultState());
 							}
+							if (world.isRemote()) {
+								ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position, true));
+							}
 							continue;
 						}
 					}
@@ -160,7 +162,7 @@ public class ImageContainer extends Container {
 					}
 				}
 			} else {
-				if (file != new File("") && player != null && !world.isRemote()) {
+				if (file != new File("") && player != null && world.isRemote()) {
 					player.sendMessage(
 							new TranslationTextComponent("container.image_block.file_non_exists", file.toString()),
 							player.getUniqueID());
@@ -182,7 +184,7 @@ public class ImageContainer extends Container {
 		}, true);
 	}
 
-	public static int getColor(int x, int y, BufferedImage image) {
+	public static int getColor(int x, int y, BufferedImage image, PlayerSaves saves) {
 		// Getting pixel color by position x and y
 		// True bewirkt, dass die Farbe einen Aplha Kanal hat(Transparenz)
 		// Alpha = 0 = Transparent, Alpha = 255 = unsdurchsichtig
@@ -191,9 +193,9 @@ public class ImageContainer extends Container {
 		// Also Wenn der Pixel Transparent ist soll er dies als Weiß darstellen
 		if (color.getAlpha() == 0) {
 			// Die nutzung der Einstellung ob leere pixel gefüllt werden sollen
-			if (Config.FILL_EMPTY_PIXEL) {
+			if (saves.fillEmptyFixel()) {
 				// Färbt den Pixel auf die dafür eingestellte Farbe
-				return Config.COLOR_TO_FILL;
+				return saves.getColorToFill();
 			} else {
 				// Gibt einen negativen wert zurück damit erkannt wird, dass der Pixel nicht
 				// gefüllt werden soll

@@ -13,7 +13,7 @@ import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.util.math.NumberingSystem;
 import com.silverminer.color_block.util.network.CColorChangePacket;
 import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
-import com.silverminer.color_block.util.network.SystemChangePacket;
+import com.silverminer.color_block.util.saves.PlayerSaves;
 import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.BlockState;
@@ -69,7 +69,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 		NumberingSystem system;
 		try {
-			system = Saves.getSystem(this.field_230706_i_.player);
+			system = Saves.getSaves(this.field_230706_i_.player).getSystem();
 			system = system == null ? NumberingSystem.DEZ : system;
 		} catch (Throwable e) {
 			system = NumberingSystem.DEZ;
@@ -148,7 +148,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 	public void setColor(int color, BlockPos position) {
 		ColorBlock.setColorStatic(color, this.getContainer().getTileEntity());
-		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position));
+		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position, false));
 		World world = this.getContainer().getTileEntity().getWorld();
 		if (world == null)
 			return;
@@ -171,9 +171,10 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 		if (this.field_230706_i_ != null) {
 			if (this.field_230706_i_.player != null) {
-				Saves.setOrCreateSystem(this.field_230706_i_.player, this.mode_button.getZahlenSystem());
-				ColorBlockPacketHandler
-						.sendToServer(new SystemChangePacket(this.mode_button.getZahlenSystem().getBase()));
+				PlayerSaves saves = Saves.getSaves(this.field_230706_i_.player);
+				saves = saves.setSystem(this.mode_button.getZahlenSystem());
+				Saves.setOrCreateSaves(this.field_230706_i_.player, saves,
+						this.field_230706_i_.player.getEntityWorld().isRemote());
 			}
 		}
 	}

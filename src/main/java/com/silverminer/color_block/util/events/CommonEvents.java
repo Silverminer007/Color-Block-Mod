@@ -7,7 +7,6 @@ import com.silverminer.color_block.ColorBlockMod;
 import com.silverminer.color_block.gui.screen.ColorBlockScreen;
 import com.silverminer.color_block.gui.screen.ImageScreen;
 import com.silverminer.color_block.init.InitContainerType;
-import com.silverminer.color_block.util.Config;
 import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
 import com.silverminer.color_block.util.saves.ColorBlocksSavedData;
 
@@ -58,13 +57,6 @@ public class CommonEvents {
 		 */
 		@SubscribeEvent
 		public static void onWorldLoad(WorldEvent.Load event) {
-
-			if (event.getWorld().isRemote()) {
-				if (!ColorBlockMod.image_path.exists()) {
-					ColorBlockMod.image_path.mkdir();
-				}
-				Config.readImageConfig();
-			}
 
 			if (event.getWorld() instanceof ServerWorld) {
 				World world = ((ServerWorld) event.getWorld()).getWorld();
