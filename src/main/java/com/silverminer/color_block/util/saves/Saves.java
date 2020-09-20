@@ -19,7 +19,8 @@ public final class Saves {
 	public static final HashMap<UUID, PlayerSaves> SAVES_BY_PLAYER_UUID = new HashMap<UUID, PlayerSaves>();
 
 	public static PlayerSaves getSaves(UUID uuid) {
-		return Saves.SAVES_BY_PLAYER_UUID.get(uuid);
+		PlayerSaves saves = Saves.SAVES_BY_PLAYER_UUID.get(uuid);
+		return saves == null ? new PlayerSaves() : saves;
 	}
 
 	public static PlayerSaves getSaves(PlayerEntity player) {
