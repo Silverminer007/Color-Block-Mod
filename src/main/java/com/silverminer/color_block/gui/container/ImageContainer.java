@@ -76,6 +76,8 @@ public class ImageContainer extends Container {
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
 		if (playerIn.getEntityWorld().isRemote()) {
+			// Send this to the Server to update the TileEntity Data there too. Else the
+			// Data wouldn't be saved
 			ColorBlockPacketHandler.sendToServer(new ImageDataPacket(this.getTileEntity().getPos(),
 					this.getTileEntity().getFile().toString(), this.getTileEntity().getOffsetPos(),
 					this.getTileEntity().getRotation().ordinal(), this.getTileEntity().getAxis().ordinal()));
@@ -105,19 +107,19 @@ public class ImageContainer extends Container {
 							int posX = 0, posY = 0;
 							switch (rot) {
 							case NONE:
-								posX = x;
+								posX = imageX- x;
 								posY = imageY - y;
 								break;
 							case CLOCKWISE_90:
-								posX = imageY - y;
+								posX = y;
 								posY = imageX - x;
 								break;
 							case CLOCKWISE_180:
-								posX = imageX - x;
+								posX = x;
 								posY = y;
 								break;
 							case COUNTERCLOCKWISE_90:
-								posX = y;
+								posX = imageY - y;
 								posY = x;
 								break;
 							default:

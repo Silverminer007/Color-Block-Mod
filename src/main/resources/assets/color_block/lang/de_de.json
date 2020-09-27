@@ -18,8 +18,10 @@
 	"container.axisButton": "Die Achse des Bildes",
 	"container.image_block.file_non_exists": "Der Pfad %s existiert nicht",
 	"container.finish": "Fertig",
-	"config.color_block.reload_config": "Das Spiel hat deine Bilder Konfiguration neu geladen",
 	"container.advanced": "Erweiterter Modus",
 	"container.use_max_image_size": "Beachte die größe des Bildes welches gebaut werden soll",
-	"container.fill_empty_pixel": "Sollen leere Pixel des Bildes gefüllt werden"
+	"container.fill_empty_pixel": "Sollen leere Pixel des Bildes gefüllt werden",
+	"container.importImage.info": "Importiere das Bild zum Bauen",
+	"container.import": "Importieren",
+	"container.invalidFile": "Der Pfad %s hat den falschen Dateityp"
 }

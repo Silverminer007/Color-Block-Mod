@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -64,15 +66,27 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 
 	private Button finish_button, advanced_button;
 
+	private Button importButton;
+
 	public boolean has_error = true;
 
-	private final int advancedYSize = 181, normalYSize = 120;
+	private final int advancedYSize = 190, normalYSize = 137;
+
+	private final int xOffsetX = 64, yOffsetX = 102, zOffsetX = 140, offsetY = 69;
+
+	private final int nameFieldX = 62, nameFieldY = 24;
+
+	private final int imageSizeX = 55, imageSizeY = 134, emptyPixelX = 55, emptyPixelY = 158, imagexX = 87,
+			imagexY = 140, imageyX = 123, imageyY = 140, fillColorX = 87, fillColorY = 164;
+
+	private final int axisX = 195, axisY = 42, rotX = 195, rotY = 18, finishX = 55, finishY = 86, advancedX = 55,
+			advancedY = 110, importX = 55, importY = 40;
 
 	public ImageScreen(ImageContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, null, titleIn);
 		this.field_238742_p_ = 60;
 		this.ySize = this.normalYSize;
-		this.xSize = 203;
+		this.xSize = 226;
 	}
 
 	public void render() {
@@ -92,7 +106,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		int j = (this.field_230709_l_ - this.ySize) / 2;
 		ImageTileEntity tileEntity = this.getContainer().getTileEntity();
 
-		this.xOffset = new TextFieldWidget(this.field_230712_o_, i + 62, j + 50, 28, 12,
+		this.xOffset = new TextFieldWidget(this.field_230712_o_, i + this.xOffsetX, j + this.offsetY, 28, 12,
 				new TranslationTextComponent("container.image_block.xOffset"));
 		this.xOffset.setCanLoseFocus(true);
 		this.xOffset.setTextColor(-1);
@@ -102,7 +116,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.xOffset.setResponder(this::updateXOffset);
 		this.field_230705_e_.add(this.xOffset);
 
-		this.yOffset = new TextFieldWidget(this.field_230712_o_, i + 100, j + 50, 28, 12,
+		this.yOffset = new TextFieldWidget(this.field_230712_o_, i + this.yOffsetX, j + this.offsetY, 28, 12,
 				new TranslationTextComponent("container.image_block.yOffset"));
 		this.yOffset.setCanLoseFocus(true);
 		this.yOffset.setTextColor(-1);
@@ -112,7 +126,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.yOffset.setResponder(this::updateYOffset);
 		this.field_230705_e_.add(this.yOffset);
 
-		this.zOffset = new TextFieldWidget(this.field_230712_o_, i + 138, j + 50, 28, 12,
+		this.zOffset = new TextFieldWidget(this.field_230712_o_, i + this.zOffsetX, j + this.offsetY, 28, 12,
 				new TranslationTextComponent("container.image_block.zOffset"));
 		this.zOffset.setCanLoseFocus(true);
 		this.zOffset.setTextColor(-1);
@@ -131,21 +145,18 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		int i = (this.field_230708_k_ - this.xSize) / 2;
 		int j = (this.field_230709_l_ - this.ySize) / 2;
 		ImageTileEntity tileEntity = this.getContainer().getTileEntity();
-		this.nameField = new TextFieldWidget(this.field_230712_o_, i + 62, j + 24, 103, 12,
+		this.nameField = new TextFieldWidget(this.field_230712_o_, i + this.nameFieldX, j + this.nameFieldY, 103, 12,
 				new TranslationTextComponent("container.image_block"));
 		this.nameField.setCanLoseFocus(true);
 		this.nameField.setTextColor(-1);
 		this.nameField.setDisabledTextColour(-1);
 		this.nameField.setEnableBackgroundDrawing(false);
-		this.nameField.setMaxStringLength(24);
+		this.nameField.setMaxStringLength(256);
 		this.nameField.setResponder(this::updateNameField);
 		this.field_230705_e_.add(this.nameField);
 		this.setFocusedDefault(this.nameField);
 		String file = tileEntity.getFile().toString();
-		if (file.contains("\\") && file.contains(".")) {
-			file = file.substring(file.lastIndexOf("\\") + 1, file.lastIndexOf("."));
-			this.nameField.setText(file);
-		}
+		this.nameField.setText(file);
 	}
 
 	public void renderAdvancedMode() {
@@ -153,7 +164,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		int j = (this.field_230709_l_ - this.advancedYSize) / 2;
 		PlayerSaves saves = Saves.getSaves(this.field_230706_i_.player);
 
-		this.ignore_image_size_button = this.func_230480_a_(new Button(i + 55, j + 114, 20, 20,
+		this.ignore_image_size_button = this.func_230480_a_(new Button(i + this.imageSizeX, j + this.imageSizeY, 20, 20,
 				ImageScreen.getBooleanButtonText(saves.ignoreImageSize()), (on_Button_Pressed) -> {
 					ImageScreen.this.onMaxImageSizeButtonPressed();
 				}, (button, mStack, x, y) -> {
@@ -162,8 +173,8 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 				}));
 		this.ignore_image_size_button.field_230694_p_ = false;
 
-		this.fill_empty_pixel_button = this.func_230480_a_(new Button(i + 55, j + 138, 20, 20,
-				ImageScreen.getBooleanButtonText(saves.fillEmptyFixel()), (on_Button_Pressed) -> {
+		this.fill_empty_pixel_button = this.func_230480_a_(new Button(i + this.emptyPixelX, j + this.emptyPixelY, 20,
+				20, ImageScreen.getBooleanButtonText(saves.fillEmptyFixel()), (on_Button_Pressed) -> {
 					ImageScreen.this.onEmptyPixelButtonPressed();
 				}, (button, mStack, x, y) -> {
 					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.fill_empty_pixel"),
@@ -171,7 +182,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 				}));
 		this.fill_empty_pixel_button.field_230694_p_ = false;
 
-		this.max_image_x = new TextFieldWidget(this.field_230712_o_, i + 87, j + 120, 28, 12,
+		this.max_image_x = new TextFieldWidget(this.field_230712_o_, i + this.imagexX, j + this.imagexY, 28, 12,
 				new TranslationTextComponent("container.max_image_x"));
 		this.max_image_x.setCanLoseFocus(true);
 		this.max_image_x.setTextColor(-1);
@@ -183,7 +194,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.max_image_x.setVisible(false);
 		this.max_image_x.setText(String.valueOf(saves.getMaxImageX()));
 
-		this.max_image_y = new TextFieldWidget(this.field_230712_o_, i + 123, j + 120, 28, 12,
+		this.max_image_y = new TextFieldWidget(this.field_230712_o_, i + this.imageyX, j + this.imageyY, 28, 12,
 				new TranslationTextComponent("container.max_image_y"));
 		this.max_image_y.setCanLoseFocus(true);
 		this.max_image_y.setTextColor(-1);
@@ -195,8 +206,8 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.max_image_y.setVisible(false);
 		this.max_image_y.setText(String.valueOf(saves.getMaxImageY()));
 
-		this.color_to_fill = new TextFieldWidget(this.field_230712_o_, i + 87, j + 144, 103, 12,
-				new TranslationTextComponent("container.color_to_fill"));
+		this.color_to_fill = new TextFieldWidget(this.field_230712_o_, i + this.fillColorX, j + this.fillColorY, 103,
+				12, new TranslationTextComponent("container.color_to_fill"));
 		this.color_to_fill.setCanLoseFocus(true);
 		this.color_to_fill.setTextColor(-1);
 		this.color_to_fill.setDisabledTextColour(-1);
@@ -214,7 +225,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		int j = (this.field_230709_l_ - this.ySize) / 2;
 
 		Rotation rot = tileEntity.getRotation();
-		this.rotationButton = this.func_230480_a_(new ImageScreen.RotationButton(i + 173, j + 18, 20, 20,
+		this.rotationButton = this.func_230480_a_(new ImageScreen.RotationButton(i + this.rotX, j + this.rotY, 20, 20,
 				ImageScreen.getButtonText(rot), (on_Button_Pressed) -> {
 					ImageScreen.this.onRotationButtonPressed();
 				}, (button, mStack, x, y) -> {
@@ -223,25 +234,33 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 				}, rot));
 
 		Axis axis = tileEntity.getAxis();
-		this.axisButton = this.func_230480_a_(new ImageScreen.AxisButton(i + 173, j + 42, 20, 20,
+		this.axisButton = this.func_230480_a_(new ImageScreen.AxisButton(i + this.axisX, j + this.axisY, 20, 20,
 				new StringTextComponent(axis.getName2().toUpperCase(Locale.ROOT)), (on_Button_Pressed) -> {
 					ImageScreen.this.onAxisButtonPressed();
 				}, (button, mStack, x, y) -> {
 					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.axisButton"), x, y);
 				}, axis));
 
-		this.finish_button = this.func_230480_a_(new Button(i + 55, j + 66, 135, 20,
+		this.finish_button = this.func_230480_a_(new Button(i + this.finishX, j + this.finishY, 135, 20,
 				new TranslationTextComponent("container.finish"), (on_Button_Pressed) -> {
 					ImageScreen.this.onFinishButtonPressed();
 				}, (button, mStack, x, y) -> {
 					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.finish"), x, y);
 				}));
 
-		this.advanced_button = this.func_230480_a_(new Button(i + 55, j + 90, 135, 20,
+		this.advanced_button = this.func_230480_a_(new Button(i + this.advancedX, j + this.advancedY, 135, 20,
 				new TranslationTextComponent("container.advanced"), (on_Button_Pressed) -> {
 					ImageScreen.this.onAdvancedButtonPressed();
 				}, (button, mStack, x, y) -> {
 					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.advanced"), x, y);
+				}));
+
+		this.importButton = this.func_230480_a_(new Button(i + this.importX, j + this.importY, 135, 20,
+				new TranslationTextComponent("container.import"), (on_Button_Pressed) -> {
+					ImageScreen.this.onImportButtonPressed();
+				}, (button, mStack, x, y) -> {
+					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.importImage.info"),
+							x, y);
 				}));
 	}
 
@@ -293,14 +312,32 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		}
 		int i = (this.field_230708_k_ - this.xSize) / 2;
 		int j = (this.field_230709_l_ - this.ySize) / 2;
-		this.setPosOfWidget(this.axisButton, i + 173, j + 42);
-		this.setPosOfWidget(this.rotationButton, i + 173, j + 18);
-		this.setPosOfWidget(this.finish_button, i + 55, j + 66);
-		this.setPosOfWidget(this.advanced_button, i + 55, j + 90);
-		this.setPosOfWidget(this.nameField, i + 62, j + 24);
-		this.setPosOfWidget(this.xOffset, i + 62, j + 50);
-		this.setPosOfWidget(this.yOffset, i + 100, j + 50);
-		this.setPosOfWidget(this.zOffset, i + 138, j + 50);
+		this.setPosOfWidget(this.axisButton, i + this.axisX, j + this.axisY);
+		this.setPosOfWidget(this.rotationButton, i + this.rotX, j + this.rotY);
+		this.setPosOfWidget(this.finish_button, i + this.finishX, j + this.finishY);
+		this.setPosOfWidget(this.advanced_button, i + this.advancedX, j + this.advancedY);
+		this.setPosOfWidget(this.nameField, i + this.nameFieldX, j + this.nameFieldY);
+		this.setPosOfWidget(this.xOffset, i + this.xOffsetX, j + this.offsetY);
+		this.setPosOfWidget(this.yOffset, i + this.yOffsetX, j + this.offsetY);
+		this.setPosOfWidget(this.zOffset, i + this.zOffsetX, j + this.offsetY);
+		this.setPosOfWidget(this.importButton, i + this.importX, j + this.importY);
+	}
+
+	public void onImportButtonPressed() {
+		String s = TinyFileDialogs.tinyfd_openFileDialog(
+				(new TranslationTextComponent("container.importImage.info")).getString(),
+				new File(ColorBlockMod.image_path, "Images").getAbsolutePath(), (PointerBuffer) null,
+				(CharSequence) null, false);
+		if (s == null)
+			return;
+		File file = new File(s);
+		String fileName = file.getAbsolutePath();
+		if (!(fileName.endsWith(".png") || fileName.endsWith(".jpg"))) {
+			this.field_230706_i_.player.sendMessage(new TranslationTextComponent("container.invalidFile", fileName),
+					this.field_230706_i_.player.getUniqueID());
+			return;
+		}
+		ImageScreen.this.nameField.setText(fileName);
 	}
 
 	public void setPosOfWidget(Widget widget, int x, int y) {
@@ -309,15 +346,20 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 	}
 
 	private void updateNameField(String nameFieldString) {
-		File file = !org.apache.commons.lang3.StringUtils.isBlank(nameFieldString)
-				? new File(ColorBlockMod.image_path + "\\" + nameFieldString + ".png")
+		File file = !org.apache.commons.lang3.StringUtils.isBlank(nameFieldString) ? new File(nameFieldString)
 				: new File("");
 		PlayerSaves saves = Saves.getSaves(this.field_230706_i_.player);
+		if (!(file.getAbsolutePath().endsWith(".png") || file.getAbsolutePath().endsWith(".jpg"))) {
+			this.has_error = true;
+			return;
+		}
 
 		this.has_error = !file.exists();
 		if (file.exists()) {
 			try {
 				BufferedImage image = ImageIO.read(file);
+				if (image == null)
+					return;
 				this.has_error = !(image.getWidth() <= saves.getMaxImageX()
 						&& image.getHeight() <= saves.getMaxImageY());
 			} catch (IOException e) {
@@ -400,61 +442,71 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.func_238474_b_(mStack, i, j, 0, 0, this.xSize, this.ySize);
 		// The File Name TextField
 		if (this.has_error && this.nameField.getText() != "") {
-			this.func_238474_b_(mStack, i + 59, j + 20, 0, this.ySize, 110, 16);// Make the textfield Red
+			this.func_238474_b_(mStack, i + this.nameFieldX - 3, j + this.nameFieldY - 4, 0, this.ySize, 110, 16);// Make
+																													// the
+																													// textfield
+																													// Red
 		} else {
 			this.func_238474_b_(mStack, i + 59, j + 20, 0, this.ySize + 16, 110, 16);// Use the normal textfield
 		}
-		int xPosLine = i + 59;
 		int usedTextureX = this.xSize - 32;
-		int yPosLine = j + 46;
 		// The xOffset Text Field
 		if (NumberingSystem.DEZ.hasInvaildChar(this.xOffset.getText(), Lists.newArrayList('-'))) {
 			// Make the textfield Red
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize, 32, 16);
+			this.func_238474_b_(mStack, i + this.xOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize, 32, 16);
 		} else {
 			// Use The normal TextField
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize + 16, 32, 16);
+			this.func_238474_b_(mStack, i + this.xOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize + 16, 32,
+					16);
 		}
-		xPosLine = i + 98;
 		// The yOffset text Field
 		if (NumberingSystem.DEZ.hasInvaildChar(this.yOffset.getText(), Lists.newArrayList('-'))) {
 			// Make the textfield Red
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize, 32, 16);
+			this.func_238474_b_(mStack, i + this.yOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize, 32, 16);
 		} else {
 			// Use The normal TextField
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize + 16, 32, 16);
+			this.func_238474_b_(mStack, i + this.yOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize + 16, 32,
+					16);
 		}
-		xPosLine = i + 137;
 		// The zOffset Text Field
 		if (NumberingSystem.DEZ.hasInvaildChar(this.zOffset.getText(), Lists.newArrayList('-'))) {
 			// Make the textfield Red
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize, 32, 16);
+			this.func_238474_b_(mStack, i + this.zOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize, 32, 16);
 		} else {
 			// Use The normal TextField
-			this.func_238474_b_(mStack, xPosLine, yPosLine, usedTextureX, this.ySize + 16, 32, 16);
+			this.func_238474_b_(mStack, i + this.zOffsetX - 3, j + this.offsetY - 4, usedTextureX, this.ySize + 16, 32,
+					16);
 		}
 
 		if (this.isAdvanced) {
 			if (NumberingSystem.DEZ.hasInvaildChar(this.max_image_x.getText(), Lists.newArrayList('-'))) {
 				// Make the textfield Red
-				this.func_238474_b_(mStack, i + 85, j + 116, usedTextureX, this.ySize, 32, 16);
+				this.func_238474_b_(mStack, i + this.imagexX - 3, j + this.imagexY - 4, usedTextureX, this.ySize, 32,
+						16);
 			} else {
 				// Use The normal TextField
-				this.func_238474_b_(mStack, i + 85, j + 116, usedTextureX, this.ySize + 16, 32, 16);
+				this.func_238474_b_(mStack, i + this.imagexX - 3, j + this.imagexY - 4, usedTextureX, this.ySize + 16,
+						32, 16);
 			}
 
 			if (NumberingSystem.DEZ.hasInvaildChar(this.max_image_y.getText(), Lists.newArrayList('-'))) {
 				// Make the textfield Red
-				this.func_238474_b_(mStack, i + 121, j + 116, usedTextureX, this.ySize, 32, 16);
+				this.func_238474_b_(mStack, i + this.imageyX - 3, j + this.imageyY - 4, usedTextureX, this.ySize, 32,
+						16);
 			} else {
 				// Use The normal TextField
-				this.func_238474_b_(mStack, i + 121, j + 116, usedTextureX, this.ySize + 16, 32, 16);
+				this.func_238474_b_(mStack, i + this.imageyX - 3, j + this.imageyY - 4, usedTextureX, this.ySize + 16,
+						32, 16);
 			}
 
 			if (NumberingSystem.DEZ.hasInvaildChar(this.color_to_fill.getText(), Lists.newArrayList('-'))) {
-				this.func_238474_b_(mStack, i + 85, j + 140, 0, this.ySize, 110, 16);// Make the textfield Red
+				this.func_238474_b_(mStack, i + this.fillColorX - 3, j + this.fillColorY - 4, 0, this.ySize, 110, 16);// Make
+																														// the
+																														// textfield
+																														// Red
 			} else {
-				this.func_238474_b_(mStack, i + 85, j + 140, 0, this.ySize + 16, 110, 16);// Use the normal textfield
+				this.func_238474_b_(mStack, i + this.fillColorX - 3, j + this.fillColorY - 4, 0, this.ySize + 16, 110,
+						16);// Use the normal textfield
 			}
 		}
 	}
@@ -513,7 +565,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		if (!this.isAdvanced) {
 			this.field_230712_o_.func_243248_b(matrix, this.field_230704_d_, 59, 6, 4210752);
 		} else {
-			this.field_230712_o_.func_243248_b(matrix, this.field_230704_d_, 59, -24, 4210752);
+			this.field_230712_o_.func_243248_b(matrix, this.field_230704_d_, 59, -22, 4210752);
 		}
 	}
 
