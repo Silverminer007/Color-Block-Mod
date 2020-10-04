@@ -23,5 +23,6 @@
     "container.fill_empty_pixel": "Fill Empty Pixels of the Image",
     "container.importImage.info": "Import the Image to build",
     "container.import": "Import",
-    "container.invalidFile": "The File %s doesn't have the right Filetype"
+    "container.invalidFile": "The File %s doesn't have the right Filetype",
+    "container.undo": "Remove Image from World"
 }

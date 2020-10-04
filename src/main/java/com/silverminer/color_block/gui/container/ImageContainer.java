@@ -16,8 +16,8 @@ import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitContainerType;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
 import com.silverminer.color_block.objects.tile_entity.ImageTileEntity;
-import com.silverminer.color_block.util.network.CColorChangePacket;
 import com.silverminer.color_block.util.network.ColorBlockPacketHandler;
+import com.silverminer.color_block.util.network.ImageColorChangePacket;
 import com.silverminer.color_block.util.network.ImageDataPacket;
 import com.silverminer.color_block.util.saves.PlayerSaves;
 import com.silverminer.color_block.util.saves.Saves;
@@ -90,6 +90,12 @@ public class ImageContainer extends Container {
 				this.getTileEntity().getAxis(), player);
 	}
 
+	public void removeImage(PlayerEntity player) {
+		ImageContainer.removeImage(this.getTileEntity().getWorld(), this.getTileEntity().getFile(),
+				this.getTileEntity().getPos(), this.getTileEntity().getOffsetPos(), this.getTileEntity().getRotation(),
+				this.getTileEntity().getAxis(), player);
+	}
+
 	public static void buildImage(World world, File file, BlockPos pos, BlockPos offsetPos, Rotation rot, Axis axis,
 			@Nullable PlayerEntity player) {
 		try {
@@ -107,7 +113,7 @@ public class ImageContainer extends Container {
 							int posX = 0, posY = 0;
 							switch (rot) {
 							case NONE:
-								posX = imageX- x;
+								posX = imageX - x;
 								posY = imageY - y;
 								break;
 							case CLOCKWISE_90:
@@ -138,12 +144,14 @@ public class ImageContainer extends Container {
 							}
 
 							int color = getColor(x, y, image, saves);
+							BlockState oldState = world.getBlockState(position);
 							if (!(color < 0)) {
 								BlockState state = InitBlocks.COLOR_BLOCK.get().getDefaultState();
 								world.setBlockState(position, state);
 								if (state.getBlock().hasTileEntity(state)) {
 									world.addTileEntity(state.getBlock().createTileEntity(state, world));
 									ColorBlock.setColorStatic(color, position, world);
+									ColorBlock.setOverwrittenState(oldState, position, world);
 								}
 								state = world.getBlockState(position);
 								world.markBlockRangeForRenderUpdate(position, state, state);
@@ -152,7 +160,8 @@ public class ImageContainer extends Container {
 								world.setBlockState(position, Blocks.AIR.getDefaultState());
 							}
 							if (world.isRemote()) {
-								ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position, true));
+								ColorBlockPacketHandler
+										.sendToServer(new ImageColorChangePacket(color, position, oldState));
 							}
 							continue;
 						}
@@ -161,6 +170,54 @@ public class ImageContainer extends Container {
 					if (world.isRemote() && player != null) {
 						player.sendMessage(new TranslationTextComponent("container.image_block.to_big_image"),
 								player.getUniqueID());
+					}
+				}
+			} else {
+				if (file != new File("") && player != null && world.isRemote()) {
+					player.sendMessage(
+							new TranslationTextComponent("container.image_block.file_non_exists", file.toString()),
+							player.getUniqueID());
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void removeImage(World world, File file, BlockPos pos, BlockPos offsetPos, Rotation rot, Axis axis,
+			@Nullable PlayerEntity player) {
+		try {
+			file = file == null ? new File("") : file;
+			if (file.exists() && !file.isDirectory()) {
+				pos = pos.add(offsetPos);
+				BufferedImage image = ImageIO.read(file);
+				int imageX = image.getWidth(), imageY = image.getHeight();
+
+				for (int x = 0; x < imageX; x++) {
+					for (int y = 0; y < imageY; y++) {
+						BlockPos position = BlockPos.ZERO;
+						int posX = imageX - x, posY = imageY - y;
+						switch (axis) {
+						case Y:
+							position = pos.add(posX, 0, posY);
+							break;
+						case X:
+							position = pos.add(0, posY, posX);
+							break;
+						case Z:
+							position = pos.add(posX, posY, 0);
+							break;
+						}
+
+						if (world.getBlockState(position).getBlock() instanceof ColorBlock) {
+							BlockState oldState = ColorBlock.getOverwrittenState(position, world);
+							world.setBlockState(position, oldState);
+							if (world.isRemote()) {
+								ColorBlockPacketHandler.sendToServer(new ImageColorChangePacket(-2, position,
+										oldState));
+							}
+						}
+						continue;
 					}
 				}
 			} else {

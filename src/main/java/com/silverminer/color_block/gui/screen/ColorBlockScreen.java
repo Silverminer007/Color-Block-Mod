@@ -148,7 +148,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 	public void setColor(int color, BlockPos position) {
 		ColorBlock.setColorStatic(color, this.getContainer().getTileEntity());
-		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position, false));
+		ColorBlockPacketHandler.sendToServer(new CColorChangePacket(color, position));
 		World world = this.getContainer().getTileEntity().getWorld();
 		if (world == null)
 			return;

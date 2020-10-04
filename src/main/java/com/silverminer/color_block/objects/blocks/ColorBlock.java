@@ -15,6 +15,7 @@ import com.silverminer.color_block.util.saves.Saves;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -55,6 +56,29 @@ public class ColorBlock extends Block {
 		if (tEntity instanceof ColorBlockTileEntity) {
 			tEntity.markDirty();
 			((ColorBlockTileEntity) tEntity).setColor(rgb);
+			return true;
+		}
+		return false;
+	}
+
+	public static BlockState getOverwrittenState(BlockPos pos, World world) {
+		return ColorBlock.getOverwrittenState(world.getTileEntity(pos));
+	}
+
+	public static BlockState getOverwrittenState(TileEntity tEntity) {
+		return tEntity instanceof ColorBlockTileEntity ? ((ColorBlockTileEntity) tEntity).getOverwrittenState()
+				: Blocks.AIR.getDefaultState();
+	}
+
+	public static boolean setOverwrittenState(BlockState state, BlockPos pos, World worldIn) {
+		TileEntity tEntity = worldIn.getTileEntity(pos);
+		return ColorBlock.setOverwrittenState(state, tEntity);
+	}
+
+	public static boolean setOverwrittenState(BlockState state, TileEntity tEntity) {
+		if (tEntity instanceof ColorBlockTileEntity) {
+			tEntity.markDirty();
+			((ColorBlockTileEntity) tEntity).setOverwrittenState(state);
 			return true;
 		}
 		return false;

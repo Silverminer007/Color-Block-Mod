@@ -11,6 +11,8 @@ import com.silverminer.color_block.objects.blocks.ColorBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -28,40 +30,48 @@ import net.minecraftforge.fml.network.NetworkEvent;
  * @author Silverminer007
  *
  */
-public class CColorChangePacket {
+public class ImageColorChangePacket {
 
-	protected static final Logger LOGGER = LogManager.getLogger(CColorChangePacket.class);
+	protected static final Logger LOGGER = LogManager.getLogger(ImageColorChangePacket.class);
 
 	private final int color;
 	private final BlockPos position;
 
-	public CColorChangePacket(int colorIn, BlockPos pos) {
+	private final BlockState state;
+
+	public ImageColorChangePacket(int colorIn, BlockPos pos, BlockState oldState) {
 		this.position = pos;
 		this.color = colorIn;
+		this.state = oldState;
 	}
 
-	public static void encode(CColorChangePacket pkt, PacketBuffer buf) {
+	public ImageColorChangePacket(int colorIn, BlockPos pos, CompoundNBT oldState) {
+		this(colorIn, pos, NBTUtil.readBlockState(oldState));
+	}
+
+	public static void encode(ImageColorChangePacket pkt, PacketBuffer buf) {
 		buf.writeInt(pkt.color);
 		buf.writeBlockPos(pkt.position);
+		buf.writeCompoundTag(NBTUtil.writeBlockState(pkt.state));
 	}
 
-	public static CColorChangePacket decode(PacketBuffer buf) {
-		return new CColorChangePacket(buf.readInt(), buf.readBlockPos());
+	public static ImageColorChangePacket decode(PacketBuffer buf) {
+		return new ImageColorChangePacket(buf.readInt(), buf.readBlockPos(), buf.readCompoundTag());
 	}
 
-	public static void handle(CColorChangePacket pkt, Supplier<NetworkEvent.Context> contextSupplier) {
+	public static void handle(ImageColorChangePacket pkt, Supplier<NetworkEvent.Context> contextSupplier) {
 		NetworkEvent.Context context = contextSupplier.get();
 		// Aus irgendeinem Grund kommt das Server Packet trotzdem auf der Client Seite
-		// an. Da context.getSender() aber einen ServerPlayerENtity zurück gbt hat man
+		// an. Da context.getSender() aber einen ServerPlayerEntity zurück gbt hat man
 		// trotzdem die Server Welt
 		// context.enqueueWork wird benutzt um die änderungen im Main Thread und nicht
 		// im Network Thread zu übernehmen
-		context.enqueueWork(Handle.handle(context.getSender(), pkt.color, pkt.position));
+		context.enqueueWork(Handle.handle(context.getSender(), pkt.color, pkt.position, pkt.state));
 		context.setPacketHandled(true);
 	}
 
 	public static class Handle {
-		public static DistExecutor.SafeRunnable handle(ServerPlayerEntity playerEntity, int color, BlockPos pos) {
+		public static DistExecutor.SafeRunnable handle(ServerPlayerEntity playerEntity, int color, BlockPos pos, BlockState oldState) {
 			return new DistExecutor.SafeRunnable() {
 
 				private static final long serialVersionUID = 2L;
@@ -73,18 +83,21 @@ public class CColorChangePacket {
 					if (playerEntity == null)
 						return;
 					World world = playerEntity.getEntityWorld();
-					if (!(color < 0)) {
+					if (0 <= color) {
 						world.setBlockState(pos, InitBlocks.COLOR_BLOCK.get().getDefaultState());
 
 						ColorBlock.setColorStatic(color, pos, world);
+						ColorBlock.setOverwrittenState(oldState, pos, world);
 
 						// Lässt Minecraft diesen Block neu rendern um die Farb änderung zu übernehmen
 						BlockState state = world.getBlockState(pos);
 						world.setBlockState(pos, state, 64);
 						world.notifyBlockUpdate(pos, state, state, 0);
 						world.markBlockRangeForRenderUpdate(pos, state, state);
-					} else {
+					} else if(-1 == color) {
 						world.setBlockState(pos, Blocks.AIR.getDefaultState());
+					} else {
+						world.setBlockState(pos, oldState);
 					}
 				}
 			};

@@ -23,5 +23,6 @@
 	"container.fill_empty_pixel": "Sollen leere Pixel des Bildes gefüllt werden",
 	"container.importImage.info": "Importiere das Bild zum Bauen",
 	"container.import": "Importieren",
-	"container.invalidFile": "Der Pfad %s hat den falschen Dateityp"
+	"container.invalidFile": "Der Pfad %s hat den falschen Dateityp",
+	"container.undo": "Das Bild wieder entfernen"
 }

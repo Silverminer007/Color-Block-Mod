@@ -68,6 +68,8 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 
 	private Button importButton;
 
+	private Button undoButton;
+
 	public boolean has_error = true;
 
 	private final int advancedYSize = 190, normalYSize = 137;
@@ -79,8 +81,8 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 	private final int imageSizeX = 55, imageSizeY = 134, emptyPixelX = 55, emptyPixelY = 158, imagexX = 87,
 			imagexY = 140, imageyX = 123, imageyY = 140, fillColorX = 87, fillColorY = 164;
 
-	private final int axisX = 195, axisY = 42, rotX = 195, rotY = 18, finishX = 55, finishY = 86, advancedX = 55,
-			advancedY = 110, importX = 55, importY = 40;
+	private final int axisX = 197, axisY = 40, rotX = 197, rotY = 16, finishX = 55, finishY = 86, advancedX = 55,
+			advancedY = 110, importX = 55, importY = 40, undoX = 172, undoY = 16;
 
 	public ImageScreen(ImageContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, null, titleIn);
@@ -262,6 +264,14 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.importImage.info"),
 							x, y);
 				}));
+
+		this.undoButton = this.func_230480_a_(new Button(i + this.undoX, j + this.undoY, 20, 20,
+				new StringTextComponent("<-"), (on_Button_Pressed) -> {
+					ImageScreen.this.onUndoButtonPressed();
+				}, (button, mStack, x, y) -> {
+					ImageScreen.this.func_238652_a_(mStack, new TranslationTextComponent("container.undo"),
+							x, y);
+				}));
 	}
 
 	private void onRotationButtonPressed() {
@@ -321,6 +331,7 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 		this.setPosOfWidget(this.yOffset, i + this.yOffsetX, j + this.offsetY);
 		this.setPosOfWidget(this.zOffset, i + this.zOffsetX, j + this.offsetY);
 		this.setPosOfWidget(this.importButton, i + this.importX, j + this.importY);
+		this.setPosOfWidget(this.undoButton, i + this.undoX, j + this.undoY);
 	}
 
 	public void onImportButtonPressed() {
@@ -338,6 +349,11 @@ public class ImageScreen extends ContainerScreen<ImageContainer> {
 			return;
 		}
 		ImageScreen.this.nameField.setText(fileName);
+	}
+
+	public void onUndoButtonPressed() {
+		this.getContainer().removeImage(this.field_230706_i_.player);
+		this.field_230706_i_.displayGuiScreen((Screen) null);
 	}
 
 	public void setPosOfWidget(Widget widget, int x, int y) {
