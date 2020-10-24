@@ -1,7 +1,12 @@
 {
-  "homepage": "https://www.curseforge.com/minecraft/mc-mods/color-block-mod/",
-  "promos": {
-    "1.16.3-latest": "1.4.2",
-    "1.16.3-recommended": "1.4.2"
-  }
+	"homepage": "https://www.curseforge.com/minecraft/mc-mods/color-block-mod/",
+	"promos": {
+		"1.16.3-latest": "1.16.3-1.4.2",
+		"1.16.3-recommended": "1.16.3-1.4.2"
+	},
+	"1.16.3": {
+		"1.16.3-1.4.0": "This is the first stable version of this mod",
+		"1.16.3-1.4.1": "Added the UNDO Button",
+		"1.16.3-1.4.2": "Implemented version check"
+	}
 }
