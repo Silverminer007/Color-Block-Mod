@@ -113,7 +113,7 @@ public class ImageTileEntity extends TileEntity implements INamedContainerProvid
 
 	public void handleUpdateTag(BlockState state, CompoundNBT tag) {
 		super.handleUpdateTag(state, tag);
-		this.func_230337_a_(state, tag);
+		this.read(state, tag);
 	}
 
 	public CompoundNBT write(CompoundNBT nbt) {
@@ -124,8 +124,8 @@ public class ImageTileEntity extends TileEntity implements INamedContainerProvid
 		return super.write(nbt);
 	}
 
-	public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-		super.func_230337_a_(state, nbt);
+	public void read(BlockState state, CompoundNBT nbt) {
+		super.read(state, nbt);
 		if (nbt.contains("file", 8)) {
 			this.setFile(new File(nbt.getString("file")));
 		}

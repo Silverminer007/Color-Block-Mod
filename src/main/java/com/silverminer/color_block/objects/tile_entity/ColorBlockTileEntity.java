@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.silverminer.color_block.gui.container.ColorBlockContainer;
+import com.silverminer.color_block.init.InitBlocks;
 import com.silverminer.color_block.init.InitTileEntityTypes;
 import com.silverminer.color_block.objects.blocks.ColorBlock;
 
@@ -70,8 +71,8 @@ public class ColorBlockTileEntity extends TileEntity implements INamedContainerP
 		return super.write(nbt);
 	}
 
-	public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-		super.func_230337_a_(state, nbt);
+	public void read(BlockState state, CompoundNBT nbt) {
+		super.read(state, nbt);
 		if (nbt.contains("color", 3)) {
 			ColorBlock.setColorStatic(nbt.getInt("color"), this);
 		}
@@ -91,7 +92,7 @@ public class ColorBlockTileEntity extends TileEntity implements INamedContainerP
 	}
 
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		this.func_230337_a_(null, pkt.getNbtCompound());
+		this.read(InitBlocks.COLOR_BLOCK.get().getDefaultState(), pkt.getNbtCompound());
 	}
 
 	@Override

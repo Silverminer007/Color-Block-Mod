@@ -63,7 +63,7 @@ public class CommonEvents {
 
 				// WorldSavedData can no longer be stored per map but only per dimension. So
 				// store the registry in the overworld.
-				if (!world.isRemote() && world.func_234923_W_() == World.field_234918_g_
+				if (!world.isRemote() && world.getDimensionKey() == World.OVERWORLD
 						&& world instanceof ServerWorld) {
 					ColorBlockMod.colorBlocksSavedData = ColorBlocksSavedData.get((ServerWorld) world);
 				}

@@ -46,16 +46,16 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 	public ColorBlockScreen(ColorBlockContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, null, titleIn);
-		this.field_238742_p_ = 60;
+		this.titleX = 60;
 		this.ySize = 62;
 		this.xSize = 203;
 	}
 
-	public void func_230453_j_() {
-		this.field_230706_i_.keyboardListener.enableRepeatEvents(true);
-		int i = (this.field_230708_k_ - this.xSize) / 2;
-		int j = (this.field_230709_l_ - this.ySize) / 2;
-		this.nameField = new TextFieldWidget(this.field_230712_o_, i + 62, j + 24, 103, 12,
+	public void initFields() {
+		this.minecraft.keyboardListener.enableRepeatEvents(true);
+		int i = (this.width - this.xSize) / 2;
+		int j = (this.height - this.ySize) / 2;
+		this.nameField = new TextFieldWidget(this.font, i + 62, j + 24, 103, 12,
 				new TranslationTextComponent("container.color_block"));
 		this.nameField.setCanLoseFocus(false);
 		this.nameField.setTextColor(-1);
@@ -63,30 +63,30 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 		this.nameField.setEnableBackgroundDrawing(false);
 		this.nameField.setMaxStringLength(24);
 		this.nameField.setResponder(this::updateNameField);
-		this.field_230705_e_.add(this.nameField);
+		this.children.add(this.nameField);
 		this.setFocusedDefault(this.nameField);
 		this.nameField.setFocused2(true);
 
 		NumberingSystem system;
 		try {
-			system = Saves.getSaves(this.field_230706_i_.player).getSystem();
+			system = Saves.getSaves(this.minecraft.player).getSystem();
 			system = system == null ? NumberingSystem.DEZ : system;
 		} catch (Throwable e) {
 			system = NumberingSystem.DEZ;
 		}
 
-		this.mode_button = this.func_230480_a_(new ColorBlockScreen.ModeButton(this.getGuiLeft() + 173,
+		this.mode_button = this.addButton(new ColorBlockScreen.ModeButton(this.getGuiLeft() + 173,
 				this.getGuiTop() + 18, 20, 20, system.getTextComponent(), (on_Button_Pressed) -> {
 					ColorBlockScreen.this.onButtonPressed();
 				}, (button, mStack, p_238488_2_, p_238488_3_) -> {
-					ColorBlockScreen.this.func_238652_a_(mStack,
+					ColorBlockScreen.this.renderTooltip(mStack,
 							new TranslationTextComponent("container.number_system_base"), p_238488_2_, p_238488_3_);
 				}, system));
 
 		int color = this.getContainer().getColor();
 		String newString = this.mode_button.getZahlenSystem().parseToStringFromDez(color);
 		this.nameField.setText(color == -1 ? "" : newString);
-		this.func_231035_a_(this.nameField);
+		this.addButton(this.nameField);
 	}
 
 	private void updateNameField(String nameFieldString) {
@@ -95,55 +95,55 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void func_230450_a_(MatrixStack mStack, float p_230450_2_, int p_230450_3_, int p_230450_4_) {
+	@Override
+	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.field_230706_i_.getTextureManager().bindTexture(ColorBlockScreen.TEXTURE);
-		int i = (this.field_230708_k_ - this.xSize) / 2;
-		int j = (this.field_230709_l_ - this.ySize) / 2;
-		this.func_238474_b_(mStack, i, j, 0, 0, this.xSize, this.ySize);
+		this.minecraft.getTextureManager().bindTexture(ColorBlockScreen.TEXTURE);
+		int i = (this.width - this.xSize) / 2;
+		int j = (this.height - this.ySize) / 2;
+		this.blit(matrixStack, i, j, 0, 0, this.xSize, this.ySize);
 		if (this.mode_button.getZahlenSystem().hasInvaildChar(this.nameField.getText())) {
-			this.func_238474_b_(mStack, i + 59, j + 20, 0, this.ySize, 110, 16);// Make the textfield Red
+			this.blit(matrixStack, i + 59, j + 20, 0, this.ySize, 110, 16);// Make the textfield Red
 		} else {
-			this.func_238474_b_(mStack, i + 59, j + 20, 0, this.ySize + 16, 110, 16);// Use the normal textfield
+			this.blit(matrixStack, i + 59, j + 20, 0, this.ySize + 16, 110, 16);// Use the normal textfield
 		}
 	}
 
-	public void func_231152_a_(Minecraft minecraft, int p_231152_2_, int p_231152_3_) {
+	public void resize(Minecraft minecraft, int width, int height) {
 		String s = this.nameField.getText();
-		this.func_231158_b_(minecraft, p_231152_2_, p_231152_3_);
+		this.init(minecraft, width, height);
 		this.nameField.setText(s);
 	}
 
-	public void func_230430_a_(MatrixStack p_230452_1_, int p_230452_2_, int p_230452_3_, float p_230452_4_) {
-		super.func_230430_a_(p_230452_1_, p_230452_2_, p_230452_3_, p_230452_4_);
-		this.nameField.func_230430_a_(p_230452_1_, p_230452_2_, p_230452_3_, p_230452_4_);
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		this.nameField.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 
-	public boolean func_231046_a_(int p_231046_1_, int p_231046_2_, int p_231046_3_) {
-		if (p_231046_1_ == 256) {
-			this.field_230706_i_.player.closeScreen();
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (keyCode == 256) {
+			this.minecraft.player.closeScreen();
 		}
 
-		return !this.nameField.func_231046_a_(p_231046_1_, p_231046_2_, p_231046_3_) && !this.nameField.canWrite()
-				? super.func_231046_a_(p_231046_1_, p_231046_2_, p_231046_3_)
+		return !this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.canWrite()
+				? super.keyPressed(keyCode, scanCode, modifiers)
 				: true;
 	}
 
-	protected void func_231160_c_() {
-		super.func_231160_c_();
-		this.func_230453_j_();
+	protected void init() {
+		super.init();
+		this.initFields();
 	}
 
-	public void func_231164_f_() {
-		super.func_231164_f_();
+	public void onClose() {
+		super.onClose();
 
-		this.field_230706_i_.keyboardListener.enableRepeatEvents(false);
+		this.minecraft.keyboardListener.enableRepeatEvents(false);
 	}
 
 	@Override
-	protected void func_230451_b_(MatrixStack matrix, int p_230451_2_, int p_230451_3_) {
-		this.field_230712_o_.func_243248_b(matrix, this.field_230704_d_, (float) this.field_238742_p_,
-				(float) this.field_238743_q_, 4210752);
+	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y) {
+		this.font.func_243248_b(matrixStack, this.title, (float)this.titleX, (float)this.titleY, 4210752);
 	}
 
 	public void setColor(int color, BlockPos position) {
@@ -169,12 +169,12 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 		this.nameField.setText(castInt == -1 ? "" : newString);
 		this.nameField.setFocused2(true);
 
-		if (this.field_230706_i_ != null) {
-			if (this.field_230706_i_.player != null) {
-				PlayerSaves saves = Saves.getSaves(this.field_230706_i_.player);
+		if (this.minecraft != null) {
+			if (this.minecraft.player != null) {
+				PlayerSaves saves = Saves.getSaves(this.minecraft.player);
 				saves = saves.setSystem(this.mode_button.getZahlenSystem());
-				Saves.setOrCreateSaves(this.field_230706_i_.player, saves,
-						this.field_230706_i_.player.getEntityWorld().isRemote());
+				Saves.setOrCreateSaves(this.minecraft.player, saves,
+						this.minecraft.player.getEntityWorld().isRemote());
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public class ColorBlockScreen extends ContainerScreen<ColorBlockContainer> {
 
 		public void setZahlenSystem(NumberingSystem systemIn) {
 			this.numbering_system = systemIn;
-			this.func_238482_a_(this.numbering_system.getTextComponent());
+			this.setMessage(this.numbering_system.getTextComponent());
 		}
 
 		public NumberingSystem getNextSystem() {
