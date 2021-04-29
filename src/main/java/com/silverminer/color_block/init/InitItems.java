@@ -23,6 +23,10 @@ public class InitItems {
 	public static final RegistryObject<Item> COLOR_BLOCK = ITEMS.register("color_block",
 			() -> new BlockItem(InitBlocks.COLOR_BLOCK.get(), new Item.Properties().group(ModItemGroups.COLOR_BLOCK)));
 
+	public static final RegistryObject<Item> COLOR_BLOCK_SLAB = ITEMS.register("slab_color_block",
+			() -> new BlockItem(InitBlocks.COLOR_BLOCK_SLAB.get(),
+					new Item.Properties().group(ModItemGroups.COLOR_BLOCK)));
+
 	/**
 	 * Registiert das Item um den Farbblock zu modifiezieren
 	 */
